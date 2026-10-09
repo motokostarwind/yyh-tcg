@@ -88,6 +88,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSynergyWorker();
   renderDeckBuilder();
   renderGauntletPills();
+  renderSavedDecks();
 });
 
 // 1. Data Fetching
@@ -1525,6 +1526,23 @@ function renderDeckBuilder() {
   // 4. Team Bonus Evaluation
   evaluateTeamBonus();
 
+  // Gauntlet Editing Banner & Save Button Visibility
+  const gauntletBanner = document.getElementById('gauntletEditBanner');
+  const btnSaveToGauntlet = document.getElementById('btnSaveToGauntlet');
+  if (state.editingGauntletKey) {
+    if (gauntletBanner) {
+      gauntletBanner.style.display = 'flex';
+      const nameEl = document.getElementById('gauntletBannerDeckName');
+      if (nameEl) nameEl.textContent = state.currentDeck.name || 'Gauntlet Opponent';
+    }
+    if (btnSaveToGauntlet) {
+      btnSaveToGauntlet.style.display = 'inline-flex';
+    }
+  } else {
+    if (gauntletBanner) gauntletBanner.style.display = 'none';
+    if (btnSaveToGauntlet) btnSaveToGauntlet.style.display = 'none';
+  }
+
   // 5. Analytics (SE Curve and Composition)
   renderAnalytics(mainDeckCount);
 
@@ -2240,17 +2258,25 @@ function setupDeckActions() {
 
   document.getElementById('deckNameInput').addEventListener('input', (e) => {
     state.currentDeck.name = e.target.value;
-    saveCurrentDeckToLocalStorage();
+    if (state.editingGauntletKey) {
+      const bannerName = document.getElementById('gauntletBannerDeckName');
+      if (bannerName) bannerName.textContent = e.target.value || 'Gauntlet Opponent';
+    } else {
+      saveCurrentDeckToLocalStorage();
+    }
   });
 
   document.getElementById('deckAuthorInput').addEventListener('input', (e) => {
     state.currentDeck.author = e.target.value;
-    saveCurrentDeckToLocalStorage();
+    if (!state.editingGauntletKey) {
+      saveCurrentDeckToLocalStorage();
+    }
   });
 
   document.getElementById('btnSaveDeck').addEventListener('click', saveDeck);
   document.getElementById('btnClearDeck').addEventListener('click', () => {
     if (confirm('Are you sure you want to clear the entire deck?')) {
+      state.editingGauntletKey = null;
       state.currentDeck.slots = { 1: null, 2: null, 3: null, 4: null };
       state.currentDeck.mainDeck = {};
       updateDeckState();
@@ -2259,6 +2285,7 @@ function setupDeckActions() {
   });
 
   document.getElementById('btnNewDeck').addEventListener('click', () => {
+    state.editingGauntletKey = null;
     state.currentDeck = {
       id: 'deck_' + Date.now(),
       name: 'New Custom Deck',
@@ -2277,43 +2304,66 @@ function setupDeckActions() {
   // Export / Import Modals
   setupExportModal();
 
-  // Meta Gauntlet Manager
+  // Meta Gauntlet Manager: Link to Saved Decks screen & Gauntlet section
   const btnManageGauntlet = document.getElementById('btnManageGauntlet');
-  if (btnManageGauntlet) btnManageGauntlet.addEventListener('click', openGauntletModal);
-
-  const gauntletModalClose = document.getElementById('gauntletModalClose');
-  if (gauntletModalClose) gauntletModalClose.addEventListener('click', closeGauntletModal);
-
-  const btnApplyGauntletClose = document.getElementById('btnApplyGauntletClose');
-  if (btnApplyGauntletClose) btnApplyGauntletClose.addEventListener('click', closeGauntletModal);
-
-  const gauntletModal = document.getElementById('gauntletModal');
-  if (gauntletModal) {
-    gauntletModal.addEventListener('click', (e) => {
-      if (e.target === gauntletModal) closeGauntletModal();
-    });
+  if (btnManageGauntlet) {
+    btnManageGauntlet.onclick = () => {
+      const tabBtn = document.querySelector('[data-tab="saved-decks"]');
+      if (tabBtn) tabBtn.click();
+      setTimeout(() => {
+        const sec = document.getElementById('gauntletDecksSection');
+        if (sec) {
+          sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          sec.classList.add('section-highlight');
+          setTimeout(() => sec.classList.remove('section-highlight'), 1200);
+        }
+      }, 80);
+      showToast('Navigated to Meta Gauntlet Opponents in Deck Library.');
+    };
   }
 
+  // Gauntlet Section Actions in Library
   const btnResetGauntlet = document.getElementById('btnResetGauntletDefaults');
-  if (btnResetGauntlet) btnResetGauntlet.addEventListener('click', resetGauntletToDefaults);
+  if (btnResetGauntlet) btnResetGauntlet.onclick = resetGauntletToDefaults;
 
   const btnAddNewGauntlet = document.getElementById('btnAddNewGauntletDeck');
-  if (btnAddNewGauntlet) btnAddNewGauntlet.addEventListener('click', () => openGauntletDeckEditor(null));
+  if (btnAddNewGauntlet) {
+    btnAddNewGauntlet.onclick = () => {
+      const newKey = 'gauntlet_' + Date.now();
+      state.editingGauntletKey = newKey;
+      state.currentDeck = {
+        id: newKey,
+        name: 'New Gauntlet Opponent',
+        author: 'Custom',
+        slots: { 1: null, 2: null, 3: null, 4: null },
+        leaderSlot: 1,
+        mainDeck: {}
+      };
+      document.getElementById('deckNameInput').value = state.currentDeck.name;
+      document.getElementById('deckAuthorInput').value = state.currentDeck.author;
+      updateDeckState();
+      state.activeTab = 'deckbuilder';
+      document.querySelector('[data-tab="deckbuilder"]').click();
+      showToast('Creating new Gauntlet opponent! Add cards and click "Save to Gauntlet" when done.');
+    };
+  }
 
-  const btnImportSaved = document.getElementById('btnImportSavedToGauntlet');
-  if (btnImportSaved) btnImportSaved.addEventListener('click', importSavedDeckToGauntlet);
+  // Save to Gauntlet Buttons (Top Bar + Banner)
+  const btnSaveToGauntlet = document.getElementById('btnSaveToGauntlet');
+  if (btnSaveToGauntlet) btnSaveToGauntlet.onclick = saveCurrentDeckToGauntlet;
 
-  const btnCloseEditor = document.getElementById('btnCloseGauntletEditor');
-  if (btnCloseEditor) btnCloseEditor.addEventListener('click', closeGauntletDeckEditor);
+  const btnSaveGauntletFromBanner = document.getElementById('btnSaveGauntletFromBanner');
+  if (btnSaveGauntletFromBanner) btnSaveGauntletFromBanner.onclick = saveCurrentDeckToGauntlet;
 
-  const btnCancelEditor = document.getElementById('btnCancelGauntletEdit');
-  if (btnCancelEditor) btnCancelEditor.addEventListener('click', closeGauntletDeckEditor);
-
-  const btnSaveEditor = document.getElementById('btnSaveGauntletDeck');
-  if (btnSaveEditor) btnSaveEditor.addEventListener('click', saveGauntletDeckFromEditor);
-
-  const btnQuickAdd = document.getElementById('btnGauntletQuickAdd');
-  if (btnQuickAdd) btnQuickAdd.addEventListener('click', handleGauntletQuickAdd);
+  // Exit Gauntlet Edit Mode
+  const btnExitGauntletEdit = document.getElementById('btnExitGauntletEdit');
+  if (btnExitGauntletEdit) {
+    btnExitGauntletEdit.onclick = () => {
+      state.editingGauntletKey = null;
+      updateDeckState();
+      showToast('Exited Gauntlet editing mode.');
+    };
+  }
 }
 
 async function saveDeck() {
@@ -2371,8 +2421,180 @@ async function loadSavedDecks() {
   state.savedDecks = decks;
 }
 
+function getDeckTeamBonus(deck) {
+  if (!deck || !deck.slots) return { hasBonus: false, teamName: null, label: 'No Team Bonus', icon: '⚪' };
+
+  const charIds = [deck.slots[1], deck.slots[2], deck.slots[3], deck.slots[4]].filter(Boolean);
+  if (charIds.length < 4) {
+    return { hasBonus: false, teamName: null, label: 'No Team Bonus (Fewer than 4 fighters)', icon: '⚪' };
+  }
+
+  const teams = charIds.map(id => {
+    const card = state.cardMap.get(id);
+    return (card && card.team && card.team !== 'None') ? card.team : null;
+  });
+
+  if (teams.every(t => t && t === teams[0])) {
+    const team = teams[0];
+    const iconMap = {
+      'Team Toguro': '💪',
+      'Team Urameshi': '⚡',
+      'Team Genkai': '🥋',
+      'Team Masho': '🥷',
+      'Team Saint Beasts': '🐉',
+      'Team Uraotogi': '🎭',
+      'Team Rokuyukai': '🔥'
+    };
+    return {
+      hasBonus: true,
+      teamName: team,
+      label: `${team} Bonus Active`,
+      icon: iconMap[team] || '✨'
+    };
+  }
+
+  return {
+    hasBonus: false,
+    teamName: null,
+    label: 'No Team Bonus',
+    icon: '⚪'
+  };
+}
+
+function renderTeamBonusTagHtml(deck) {
+  const bonus = getDeckTeamBonus(deck);
+  if (bonus.hasBonus) {
+    return `<span class="deck-team-tag tag-bonus-active" title="Active Team Bonus: ${bonus.teamName}"><span class="team-tag-dot"></span>${bonus.icon} ${bonus.teamName} Bonus Active</span>`;
+  }
+  return `<span class="deck-team-tag tag-bonus-none" title="All 4 starting fighters must share the same team to unlock a team bonus"><span class="team-tag-dot"></span>No Team Bonus</span>`;
+}
+
 function renderSavedDecks() {
+  renderGauntletDecksGrid();
+  renderMySavedDecksGrid();
+}
+
+function renderGauntletDecksGrid() {
+  const container = document.getElementById('gauntletDecksGrid');
+  if (!container) return;
+  container.innerHTML = '';
+
+  if (!state.metaGauntlet) initMetaGauntlet();
+
+  const entries = Object.entries(state.metaGauntlet || {});
+  if (entries.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-dim); padding:20px; text-align:center; grid-column:1/-1;">No gauntlet opponents configured. Click "Reset Defaults" to restore tournament benchmark decks.</div>';
+    return;
+  }
+
+  entries.forEach(([key, deck]) => {
+    const card = document.createElement('div');
+    const isEnabled = deck.enabled !== false;
+    card.className = `deck-library-card gauntlet-deck-card ${isEnabled ? 'is-active' : 'is-inactive'}`;
+
+    // Starting character thumbnails
+    let thumbsHtml = '';
+    for (let s = 1; s <= 4; s++) {
+      const cId = deck.slots ? deck.slots[s] : null;
+      const charCard = cId ? state.cardMap.get(cId) : null;
+      if (charCard) {
+        const imgSrc = charCard.images?.primary || charCard.imageUrl || '';
+        thumbsHtml += `<img class="library-thumb" src="${imgSrc}" title="${charCard.name}" alt="${charCard.name}">`;
+      } else {
+        thumbsHtml += `<div class="library-thumb" style="background:#0f172a; border:1px dashed #475569; display:flex; align-items:center; justify-content:center; font-size:10px; color:#64748b;" title="Slot ${s} Empty">#${s}</div>`;
+      }
+    }
+
+    const mainCount = Object.values(deck.mainDeck || {}).reduce((a, b) => a + b, 0);
+
+    card.innerHTML = `
+      <div class="library-card-header">
+        <div>
+          <div class="library-deck-title-row">
+            <span class="gauntlet-card-icon">${deck.icon || '⚔️'}</span>
+            <div class="library-deck-name">${deck.name}</div>
+          </div>
+          <div class="library-deck-author">Gauntlet Opponent (${deck.author || 'Score Benchmark'})</div>
+        </div>
+        ${renderTeamBonusTagHtml(deck)}
+      </div>
+      <div class="library-char-previews">
+        ${thumbsHtml || '<span class="text-dim">No starting characters</span>'}
+      </div>
+      <div class="library-deck-stats">
+        <span>Main Deck: <strong>${mainCount}</strong> cards</span>
+      </div>
+      <div class="gauntlet-card-status-bar">
+        <label class="gauntlet-switch-label" title="Toggle whether this opponent is simulated in the Meta Gauntlet">
+          <span class="gauntlet-switch">
+            <input type="checkbox" class="gauntlet-card-toggle" ${isEnabled ? 'checked' : ''}>
+            <span class="gauntlet-slider round"></span>
+          </span>
+          <span class="gauntlet-status-label ${isEnabled ? 'status-active' : 'status-inactive'}">
+            ${isEnabled ? 'Active in Simulation' : 'Inactive in Simulation'}
+          </span>
+        </label>
+      </div>
+      <div class="library-actions">
+        <button class="btn btn-primary btn-sm btn-edit-gauntlet-deck" title="Edit this opponent deck in the full Deck Builder">✏️ Edit Deck</button>
+        <button class="btn btn-secondary btn-sm btn-del-gauntlet-deck" title="Remove this opponent from the Meta Gauntlet" style="color:#ef4444;">🗑️ Delete</button>
+      </div>
+    `;
+
+    // Toggle on/off for simulation
+    const toggle = card.querySelector('.gauntlet-card-toggle');
+    toggle.onchange = () => {
+      const activeCount = Object.values(state.metaGauntlet).filter(d => d.enabled !== false).length;
+      if (isEnabled && activeCount <= 1 && !toggle.checked) {
+        toggle.checked = true;
+        showToast('⚠️ At least one opponent must remain active in the simulation gauntlet!');
+        return;
+      }
+      deck.enabled = toggle.checked;
+      localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+      renderGauntletDecksGrid();
+      renderGauntletPills();
+      runSynergyCalculation();
+      showToast(`"${deck.name}" is now ${deck.enabled ? 'ACTIVE' : 'INACTIVE'} in simulations.`);
+    };
+
+    // Edit button -> loads into full Deck Builder!
+    card.querySelector('.btn-edit-gauntlet-deck').onclick = () => {
+      state.editingGauntletKey = key;
+      state.currentDeck = JSON.parse(JSON.stringify(deck));
+      if (!state.currentDeck.slots) state.currentDeck.slots = { 1: null, 2: null, 3: null, 4: null };
+      if (!state.currentDeck.mainDeck) state.currentDeck.mainDeck = {};
+      document.getElementById('deckNameInput').value = deck.name;
+      document.getElementById('deckAuthorInput').value = deck.author || 'Gauntlet Opponent';
+      updateDeckState();
+      state.activeTab = 'deckbuilder';
+      document.querySelector('[data-tab="deckbuilder"]').click();
+      showToast(`Editing Gauntlet Opponent: "${deck.name}". Modify cards and click "Save to Gauntlet" when done!`);
+    };
+
+    // Delete button
+    card.querySelector('.btn-del-gauntlet-deck').onclick = () => {
+      if (Object.keys(state.metaGauntlet).length <= 1) {
+        showToast('⚠️ Cannot delete the last opponent in the Meta Gauntlet!');
+        return;
+      }
+      if (confirm(`Remove opponent "${deck.name}" from the Meta Gauntlet?`)) {
+        delete state.metaGauntlet[key];
+        localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+        renderGauntletDecksGrid();
+        renderGauntletPills();
+        runSynergyCalculation();
+        showToast(`Removed "${deck.name}" from Meta Gauntlet.`);
+      }
+    };
+
+    container.appendChild(card);
+  });
+}
+
+function renderMySavedDecksGrid() {
   const container = document.getElementById('savedDecksGrid');
+  if (!container) return;
   container.innerHTML = '';
 
   state.savedDecks.forEach(deck => {
@@ -2385,7 +2607,8 @@ function renderSavedDecks() {
       const cId = deck.slots[s];
       const charCard = state.cardMap.get(cId);
       if (charCard) {
-        thumbsHtml += `<img class="library-thumb" src="${charCard.images.primary}" title="${charCard.name}">`;
+        const imgSrc = charCard.images?.primary || charCard.imageUrl || '';
+        thumbsHtml += `<img class="library-thumb" src="${imgSrc}" title="${charCard.name}" alt="${charCard.name}">`;
       }
     }
 
@@ -2397,20 +2620,23 @@ function renderSavedDecks() {
           <div class="library-deck-name">${deck.name}</div>
           <div class="library-deck-author">By ${deck.author || 'Anonymous'}</div>
         </div>
+        ${renderTeamBonusTagHtml(deck)}
       </div>
       <div class="library-char-previews">
         ${thumbsHtml || '<span class="text-dim">No starting characters</span>'}
       </div>
       <div class="library-deck-stats">
-        <span>Main Deck: ${mainCount} cards</span>
+        <span>Main Deck: <strong>${mainCount}</strong> cards</span>
       </div>
       <div class="library-actions">
         <button class="btn btn-primary btn-sm btn-load-deck">Load Deck</button>
+        <button class="btn btn-secondary btn-sm btn-copy-gauntlet" title="Copy this deck to Meta Gauntlet as a simulation opponent">📋 Copy to Gauntlet</button>
         <button class="btn btn-secondary btn-sm btn-del-deck">Delete</button>
       </div>
     `;
 
     card.querySelector('.btn-load-deck').onclick = () => {
+      state.editingGauntletKey = null;
       state.currentDeck = JSON.parse(JSON.stringify(deck));
       document.getElementById('deckNameInput').value = deck.name;
       document.getElementById('deckAuthorInput').value = deck.author || '';
@@ -2418,6 +2644,30 @@ function renderSavedDecks() {
       state.activeTab = 'deckbuilder';
       document.querySelector('[data-tab="deckbuilder"]').click();
       showToast(`Loaded deck: ${deck.name}`);
+    };
+
+    // Copy to Gauntlet button!
+    card.querySelector('.btn-copy-gauntlet').onclick = () => {
+      const newKey = 'gauntlet_copy_' + Date.now();
+      const teamBonus = getDeckTeamBonus(deck);
+      state.metaGauntlet[newKey] = {
+        id: newKey,
+        name: deck.name,
+        author: deck.author || 'Anonymous',
+        team: teamBonus.teamName || 'None',
+        icon: teamBonus.icon !== '⚪' ? teamBonus.icon : '⚔️',
+        slots: JSON.parse(JSON.stringify(deck.slots || { 1: null, 2: null, 3: null, 4: null })),
+        leaderSlot: deck.leaderSlot || 1,
+        mainDeck: JSON.parse(JSON.stringify(deck.mainDeck || {})),
+        enabled: true
+      };
+      localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+      renderSavedDecks();
+      renderGauntletPills();
+      runSynergyCalculation();
+      showToast(`📋 Copied "${deck.name}" to Meta Gauntlet opponents!`);
+      const sec = document.getElementById('gauntletDecksSection');
+      if (sec) sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
 
     card.querySelector('.btn-del-deck').onclick = async () => {
@@ -3241,6 +3491,34 @@ function importSavedDeckToGauntlet() {
   showToast(`Successfully imported "${deck.name}" into Meta Gauntlet!`);
 }
 
+function saveCurrentDeckToGauntlet() {
+  if (!state.editingGauntletKey) {
+    state.editingGauntletKey = 'gauntlet_' + Date.now();
+  }
+
+  const teamBonus = getDeckTeamBonus(state.currentDeck);
+  const existingDeck = (state.metaGauntlet && state.metaGauntlet[state.editingGauntletKey]) || {};
+
+  state.metaGauntlet[state.editingGauntletKey] = {
+    ...existingDeck,
+    id: state.editingGauntletKey,
+    name: state.currentDeck.name || 'Gauntlet Opponent',
+    author: state.currentDeck.author || 'Gauntlet Opponent',
+    team: teamBonus.teamName || 'None',
+    icon: teamBonus.icon !== '⚪' ? teamBonus.icon : (existingDeck.icon || '⚔️'),
+    slots: { ...state.currentDeck.slots },
+    leaderSlot: state.currentDeck.leaderSlot || 1,
+    mainDeck: { ...state.currentDeck.mainDeck },
+    enabled: existingDeck.enabled !== false
+  };
+
+  localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+  renderGauntletPills();
+  renderSavedDecks();
+  runSynergyCalculation();
+  showToast(`💾 Saved "${state.currentDeck.name}" to Meta Gauntlet!`);
+}
+
 function resetGauntletToDefaults() {
   if (confirm('Reset the Meta Gauntlet to default Score tournament benchmark decks? Any custom decks will be replaced.')) {
     if (typeof META_GAUNTLET_DECKS !== 'undefined') {
@@ -3252,7 +3530,7 @@ function resetGauntletToDefaults() {
       state.metaGauntlet[k].enabled = true;
     }
     localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
-    renderGauntletModalDecks();
+    renderSavedDecks();
     renderGauntletPills();
     runSynergyCalculation();
     showToast('Meta Gauntlet reset to defaults.');

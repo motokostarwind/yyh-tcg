@@ -240,6 +240,21 @@
       <section id="tab-deckbuilder" class="tab-pane">
         <div class="deckbuilder-container">
           
+          <!-- Gauntlet Deck Editing Banner -->
+          <div id="gauntletEditBanner" class="gauntlet-builder-banner" style="display: none;">
+            <div class="gauntlet-banner-left">
+              <span class="gauntlet-banner-icon">⚔️</span>
+              <div class="gauntlet-banner-text">
+                <span class="gauntlet-banner-title">Editing Meta Gauntlet Opponent: <strong id="gauntletBannerDeckName">Deck Name</strong></span>
+                <span class="gauntlet-banner-sub">Changes will update this simulation opponent deck.</span>
+              </div>
+            </div>
+            <div class="gauntlet-banner-actions">
+              <button class="btn btn-warning btn-sm" id="btnSaveGauntletFromBanner">💾 Save to Gauntlet</button>
+              <button class="btn btn-secondary btn-sm" id="btnExitGauntletEdit">✕ Done Editing</button>
+            </div>
+          </div>
+
           <!-- Deck Summary Top Bar -->
           <div class="deck-top-bar">
             <div class="deck-meta-inputs">
@@ -266,6 +281,7 @@
             </div>
 
             <div class="deck-bar-actions">
+              <button class="btn btn-warning" id="btnSaveToGauntlet" style="display: none;" title="Save changes directly to this Meta Gauntlet opponent deck">💾 Save to Gauntlet</button>
               <button class="btn btn-primary" id="btnSaveDeck">Save Deck</button>
               <button class="btn btn-secondary" id="btnClearDeck">Clear Deck</button>
             </div>
@@ -622,11 +638,38 @@
       <section id="tab-saved-decks" class="tab-pane">
         <div class="saved-decks-container">
           <div class="saved-decks-header">
-            <h2>Saved Deck Library</h2>
-            <p>Access your saved decks, pre-built starters, or import community decks.</p>
+            <h2>Deck Library & Meta Gauntlet</h2>
+            <p>Manage your saved deck builds and configure opponent decks simulated in the Monte Carlo engine.</p>
           </div>
-          <div class="saved-decks-grid" id="savedDecksGrid">
-            <!-- Rendered dynamically -->
+
+          <!-- Section 1: Meta Gauntlet Opponents -->
+          <div class="library-section-block" id="gauntletDecksSection">
+            <div class="library-section-header">
+              <div class="library-section-title-wrap">
+                <h3 class="library-section-title">⚔️ Meta Gauntlet Opponents</h3>
+                <span class="library-section-subtitle">These benchmark archetypes are simulated against your active deck. Toggle them ON/OFF or click Edit to customize their cards.</span>
+              </div>
+              <div class="library-section-actions">
+                <button class="btn btn-secondary btn-sm" id="btnResetGauntletDefaults" title="Restore original Score tournament benchmark decks">🔄 Reset Defaults</button>
+                <button class="btn btn-primary btn-sm" id="btnAddNewGauntletDeck" title="Create a new opponent deck in Deck Builder">➕ New Gauntlet Deck</button>
+              </div>
+            </div>
+            <div class="saved-decks-grid gauntlet-decks-grid" id="gauntletDecksGrid">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Section 2: My Saved Decks -->
+          <div class="library-section-block" id="mySavedDecksSection">
+            <div class="library-section-header">
+              <div class="library-section-title-wrap">
+                <h3 class="library-section-title">📚 My Saved Decks</h3>
+                <span class="library-section-subtitle">Your personal saved deck collection. Click "📋 Copy to Gauntlet" on any deck to test your current build against it!</span>
+              </div>
+            </div>
+            <div class="saved-decks-grid" id="savedDecksGrid">
+              <!-- Rendered dynamically -->
+            </div>
           </div>
         </div>
       </section>
