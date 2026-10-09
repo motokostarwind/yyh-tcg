@@ -11,6 +11,7 @@ const state = {
   cardMap: new Map(),
   activeTab: 'catalog',
   currentView: 'grid', // 'grid' | 'table'
+  deckViewMode: localStorage.getItem('yyh_deck_view_mode') || 'stacks', // 'stacks' | 'grid' | 'list'
   activeModalCard: null,
   
   // Deck State
@@ -253,6 +254,27 @@ function setupFilterListeners() {
   };
 
   searchInput.addEventListener('input', applyFilters);
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      if (state.filteredCards && state.filteredCards.length > 0) {
+        const topCard = state.filteredCards[0];
+        const currCount = state.currentDeck.mainDeck[topCard.id] || 0;
+        if (currCount >= (topCard.limitPerDeck || 3)) {
+          showToast(`⚠️ "${topCard.name}" is already at max limit (${topCard.limitPerDeck} per deck).`);
+        } else {
+          addCardToMainDeck(topCard.id);
+          const newCount = state.currentDeck.mainDeck[topCard.id] || 1;
+          showToast(`➕ Added "${topCard.name}" (${newCount}/${topCard.limitPerDeck || 3}) to Deck!`);
+        }
+        searchInput.focus();
+        searchInput.select();
+      } else {
+        showToast('No matching card to add.');
+      }
+    }
+  });
+
   clearSearchBtn.addEventListener('click', () => {
     searchInput.value = '';
     applyFilters();
@@ -332,12 +354,18 @@ function renderCardGrid() {
       </div>
     ` : '';
 
+    const hasCombos = c.comboLines && c.comboLines.length > 0;
+    const comboBadgeHtml = hasCombos ? `<div class="card-combo-floating-badge" data-id="${c.id}" title="View ${c.comboLines.length} Combo Recipe(s)">💥 ${c.comboLines.length} Combo${c.comboLines.length > 1 ? 's' : ''}</div>` : '';
+    const comboBtnText = hasCombos ? `💥 ${c.comboLines.length} Combo${c.comboLines.length > 1 ? 's' : ''}` : '⚡ Combos';
+    const comboBtnClass = hasCombos ? 'btn btn-combo-inspect has-combos' : 'btn btn-combo-inspect no-combos';
+
     cardEl.innerHTML = `
       <div class="card-img-container" data-id="${c.id}">
         <img class="card-img" src="${c.images.primary}" alt="${c.name}" loading="lazy" onerror="this.src='https://placehold.co/240x336/131b2e/38bdf8?text=YYH+TCG'">
         <div class="card-rarity-tag">${c.rarity}</div>
         ${limitHtml}
         ${errataHtml}
+        ${comboBadgeHtml}
       </div>
       <div class="card-info">
         <div class="card-title" data-id="${c.id}" title="${c.name}">${c.name}</div>
@@ -353,7 +381,7 @@ function renderCardGrid() {
             <button class="btn btn-add-main" data-id="${c.id}">
               + Main (${currentDeckCount}/${c.limitPerDeck})
             </button>
-            <button class="btn btn-combo-inspect" data-id="${c.id}" title="Inspect Combos & Synergies">⚡ Combos</button>
+            <button class="${comboBtnClass}" data-id="${c.id}" title="Inspect Combos & Synergies">${comboBtnText}</button>
           </div>
           ${slotButtons}
         </div>
@@ -361,11 +389,14 @@ function renderCardGrid() {
     `;
 
     // Click on artwork or title opens modal
-    cardEl.querySelector('.card-img-container').addEventListener('click', () => openCardModal(c));
+    cardEl.querySelector('.card-img-container').addEventListener('click', (e) => {
+      if (e.target.closest('.card-combo-floating-badge')) return;
+      openCardModal(c);
+    });
     cardEl.querySelector('.card-title').addEventListener('click', () => openCardModal(c));
 
     // Combo inspector button and badge
-    cardEl.querySelectorAll('.btn-combo-inspect, .badge-combo').forEach(el => {
+    cardEl.querySelectorAll('.btn-combo-inspect, .badge-combo, .card-combo-floating-badge').forEach(el => {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
         inspectCardCombos(c);
@@ -1354,6 +1385,17 @@ function renderDeckBuilder() {
   });
 
   // 2. Main Deck Categories
+  const listCol = document.querySelector('.deck-cards-list-col');
+  const deckMode = state.deckViewMode || 'stacks';
+  if (listCol) {
+    listCol.className = 'deck-cards-list-col deck-view-' + deckMode;
+  }
+
+  // Ensure switcher button state is in sync
+  document.querySelectorAll('.view-toggle-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.deckView === deckMode);
+  });
+
   renderDeckCategory('Technique', 'itemsTechs', 'countTechs');
   renderDeckCategory('Event', 'itemsEvents', 'countEvents');
   renderDeckCategory('Item', 'itemsItems', 'countItems');
@@ -1417,9 +1459,21 @@ function renderDeckCategory(cardType, containerId, countId) {
   const container = document.getElementById(containerId);
   container.innerHTML = '';
 
+  const mode = state.deckViewMode || 'stacks';
+  container.className = 'type-items view-' + mode;
+
   const matchingEntries = Object.entries(state.currentDeck.mainDeck).filter(([id]) => {
     const card = state.cardMap.get(id);
     return card && card.cardType === cardType;
+  });
+
+  // Alphabetical sort by card name within each category
+  matchingEntries.sort(([idA], [idB]) => {
+    const cardA = state.cardMap.get(idA);
+    const cardB = state.cardMap.get(idB);
+    const nameA = (cardA?.name || '').toLowerCase();
+    const nameB = (cardB?.name || '').toLowerCase();
+    return nameA.localeCompare(nameB);
   });
 
   const totalCatCount = matchingEntries.reduce((sum, [, count]) => sum + count, 0);
@@ -1430,37 +1484,106 @@ function renderDeckCategory(cardType, containerId, countId) {
     return;
   }
 
-  matchingEntries.forEach(([id, count]) => {
-    const card = state.cardMap.get(id);
-    const row = document.createElement('div');
-    row.className = 'deck-card-row';
+  if (mode === 'stacks') {
+    // 1. Visual Stacks Mode (Cascading card piles with header banner and artwork)
+    matchingEntries.forEach(([id, count], idx) => {
+      const card = state.cardMap.get(id);
+      const statText = card.defense ? `DEF ${card.defense}` : (card.seCost !== null ? `SE ${card.seCost}` : '');
+      const stackCard = document.createElement('div');
+      stackCard.className = 'deck-stack-card';
+      stackCard.dataset.id = id;
+      stackCard.style.zIndex = idx + 1;
 
-    row.innerHTML = `
-      <div class="deck-card-left">
-        <img class="deck-row-thumb" src="${card.images.primary}" alt="${card.name}">
-        <div class="deck-row-info">
-          <span class="deck-row-name">${card.name}</span>
-          <span class="deck-row-sub">
-            <span>${card.cardNumber}</span> •
-            <span>${card.defense ? `DEF ${card.defense}` : (card.seCost !== null ? `SE ${card.seCost}` : '')}</span>
-          </span>
+      stackCard.innerHTML = `
+        <div class="stack-card-banner">
+          <span class="stack-qty-badge">${count}x</span>
+          <span class="stack-card-name" title="${card.name}">${card.name}</span>
+          <span class="stack-card-stat">${statText}</span>
         </div>
-      </div>
-      <div class="deck-card-controls">
-        <button class="qty-btn btn-minus" data-id="${id}">-</button>
-        <span class="qty-display">${count}</span>
-        <button class="qty-btn btn-plus" data-id="${id}">+</button>
-        <button class="deck-row-remove" data-id="${id}" title="Remove card">✕</button>
-      </div>
-    `;
+        <div class="stack-card-img-wrapper">
+          <img class="stack-card-img" src="${card.images.primary}" alt="${card.name}" loading="lazy" onerror="this.src='https://placehold.co/240x336/131b2e/38bdf8?text=YYH+TCG'">
+        </div>
+        <div class="stack-card-controls">
+          <button class="qty-btn btn-minus" data-id="${id}" title="Decrease count">-</button>
+          <span class="qty-display">${count}</span>
+          <button class="qty-btn btn-plus" data-id="${id}" title="Increase count">+</button>
+          <button class="qty-btn btn-view-stack" data-id="${id}" title="View card in pop-up">👁️</button>
+          <button class="deck-row-remove" data-id="${id}" title="Remove all copies">✕</button>
+        </div>
+      `;
 
-    row.querySelector('.deck-card-left').onclick = () => openCardModal(card);
-    row.querySelector('.btn-minus').onclick = () => removeCardFromMainDeck(id);
-    row.querySelector('.btn-plus').onclick = () => addCardToMainDeck(id);
-    row.querySelector('.deck-row-remove').onclick = () => deleteCardFromMainDeck(id);
+      stackCard.querySelector('.stack-card-banner').onclick = () => openCardModal(card);
+      stackCard.querySelector('.stack-card-img-wrapper').onclick = () => openCardModal(card);
+      stackCard.querySelector('.btn-view-stack').onclick = (e) => { e.stopPropagation(); openCardModal(card); };
+      stackCard.querySelector('.btn-minus').onclick = (e) => { e.stopPropagation(); removeCardFromMainDeck(id); };
+      stackCard.querySelector('.btn-plus').onclick = (e) => { e.stopPropagation(); addCardToMainDeck(id); };
+      stackCard.querySelector('.deck-row-remove').onclick = (e) => { e.stopPropagation(); deleteCardFromMainDeck(id); };
 
-    container.appendChild(row);
-  });
+      container.appendChild(stackCard);
+    });
+  } else if (mode === 'grid') {
+    // 2. Visual Grid Mode (Card tiles with controls at bottom)
+    matchingEntries.forEach(([id, count]) => {
+      const card = state.cardMap.get(id);
+      const statText = card.defense ? `DEF ${card.defense}` : (card.seCost !== null ? `SE ${card.seCost}` : '');
+      const tile = document.createElement('div');
+      tile.className = 'deck-grid-tile';
+      tile.dataset.id = id;
+
+      tile.innerHTML = `
+        <div class="tile-img-container">
+          <img class="tile-card-img" src="${card.images.primary}" alt="${card.name}" loading="lazy" onerror="this.src='https://placehold.co/240x336/131b2e/38bdf8?text=YYH+TCG'">
+          <div class="tile-qty-tag">${count}x</div>
+          <div class="tile-header-bar">
+            <span class="tile-card-name" title="${card.name}">${card.name}</span>
+          </div>
+        </div>
+        <div class="tile-controls-bar">
+          <button class="qty-btn btn-minus" data-id="${id}" title="Decrease count">-</button>
+          <span class="qty-display">${count}</span>
+          <button class="qty-btn btn-plus" data-id="${id}" title="Increase count">+</button>
+          <button class="deck-row-remove" data-id="${id}" title="Remove card">✕</button>
+        </div>
+      `;
+
+      tile.querySelector('.tile-img-container').onclick = () => openCardModal(card);
+      tile.querySelector('.btn-minus').onclick = (e) => { e.stopPropagation(); removeCardFromMainDeck(id); };
+      tile.querySelector('.btn-plus').onclick = (e) => { e.stopPropagation(); addCardToMainDeck(id); };
+      tile.querySelector('.deck-row-remove').onclick = (e) => { e.stopPropagation(); deleteCardFromMainDeck(id); };
+
+      container.appendChild(tile);
+    });
+  } else {
+    // 3. Compact List Mode (Clean, space-efficient rows)
+    matchingEntries.forEach(([id, count]) => {
+      const card = state.cardMap.get(id);
+      const statText = card.defense ? `DEF ${card.defense}` : (card.seCost !== null ? `SE ${card.seCost}` : '');
+      const row = document.createElement('div');
+      row.className = 'deck-card-row compact-row';
+      row.dataset.id = id;
+
+      row.innerHTML = `
+        <div class="deck-card-left">
+          <span class="compact-qty">${count}</span>
+          <span class="deck-row-name" title="${card.name}">${card.name}</span>
+          <span class="deck-row-stat">${statText}</span>
+        </div>
+        <div class="deck-card-controls">
+          <button class="qty-btn btn-minus" data-id="${id}">-</button>
+          <span class="qty-display">${count}</span>
+          <button class="qty-btn btn-plus" data-id="${id}">+</button>
+          <button class="deck-row-remove" data-id="${id}" title="Remove card">✕</button>
+        </div>
+      `;
+
+      row.querySelector('.deck-card-left').onclick = () => openCardModal(card);
+      row.querySelector('.btn-minus').onclick = (e) => { e.stopPropagation(); removeCardFromMainDeck(id); };
+      row.querySelector('.btn-plus').onclick = (e) => { e.stopPropagation(); addCardToMainDeck(id); };
+      row.querySelector('.deck-row-remove').onclick = (e) => { e.stopPropagation(); deleteCardFromMainDeck(id); };
+
+      container.appendChild(row);
+    });
+  }
 }
 
 function setCheckItem(id, pass, text) {
@@ -2008,6 +2131,20 @@ function renderMatchupSimulation(sim) {
 
 // 9. Deck Saving & Library Integration
 function setupDeckActions() {
+  // Main Deck View Mode Switcher
+  document.querySelectorAll('.view-toggle-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.deckView;
+      if (!mode) return;
+      state.deckViewMode = mode;
+      localStorage.setItem('yyh_deck_view_mode', mode);
+      document.querySelectorAll('.view-toggle-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.deckView === mode);
+      });
+      renderDeckBuilder();
+    });
+  });
+
   const btnRunSim = document.getElementById('btnRunSimulation');
   if (btnRunSim) {
     btnRunSim.addEventListener('click', () => {

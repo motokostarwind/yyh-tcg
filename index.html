@@ -54,8 +54,9 @@
           <div class="search-row">
             <div class="search-input-wrapper">
               <span class="search-icon">🔍</span>
-              <input type="text" id="searchInput" placeholder="Search by card name, rules text, attacks, or code..." autocomplete="off">
+              <input type="text" id="searchInput" placeholder="Search cards by name, text, combo (Press Enter to fast-add top result)..." autocomplete="off">
               <button id="clearSearchBtn" class="clear-btn" title="Clear search">✕</button>
+              <span class="search-fast-add-hint" title="Press Enter to immediately add the first search result to your active deck">↵ Enter to Add</span>
             </div>
             <div class="quick-stats">
               <span id="filteredCount">533</span> cards found
@@ -342,6 +343,25 @@
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Main Deck View Mode Switcher Toolbar -->
+          <div class="deck-view-bar">
+            <div class="deck-view-title-group">
+              <span class="deck-view-title">Main Deck Construction</span>
+              <span class="deck-view-hint">Choose your preferred visual layout</span>
+            </div>
+            <div class="deck-view-switcher">
+              <button class="view-toggle-btn active" data-deck-view="stacks" title="Visual Stacks View (Overlapping card piles by category)">
+                <span class="view-toggle-icon">🃏</span> Visual Stacks
+              </button>
+              <button class="view-toggle-btn" data-deck-view="grid" title="Visual Grid View (Card thumbnails with controls)">
+                <span class="view-toggle-icon">🎴</span> Visual Grid
+              </button>
+              <button class="view-toggle-btn" data-deck-view="list" title="Compact List View (Tight multi-column list)">
+                <span class="view-toggle-icon">📋</span> Compact List
+              </button>
             </div>
           </div>
 
