@@ -476,6 +476,59 @@
                 </div>
               </div>
 
+              <!-- Monte Carlo Matchup Simulator & Combo Synergy Engine -->
+              <div class="analytics-card simulator-card" id="deckSimulatorCard">
+                <div class="card-header-flex">
+                  <div>
+                    <h4>⚔️ Matchup Simulation & Combo Synergy Discovery</h4>
+                    <span class="header-sub">Simulates matches against Meta Gauntlet to identify top combos & pairings</span>
+                  </div>
+                  <button class="btn btn-primary btn-sm" id="btnRunSimulation">⚔️ Run 1,000 Matches</button>
+                </div>
+                
+                <div class="sim-overall-score-row" id="simOverallScoreRow">
+                  <div class="sim-metric-pill">
+                    <span class="sim-pill-label">Gauntlet Win Rate</span>
+                    <span class="sim-pill-val" id="simGauntletWinRate">--%</span>
+                  </div>
+                  <div class="sim-metric-pill">
+                    <span class="sim-pill-label">Deck Synergy Rating</span>
+                    <span class="sim-pill-val" id="simDeckSynergyScore">-- / 100</span>
+                  </div>
+                  <div class="sim-metric-pill">
+                    <span class="sim-pill-label">Active Combos</span>
+                    <span class="sim-pill-val" id="simActiveCombosCount">0</span>
+                  </div>
+                </div>
+
+                <!-- Archetype Matchup Results Grid -->
+                <div class="sim-matchups-grid" id="simMatchupsGrid">
+                  <!-- 4 Gauntlet Decks with Win Rates and Avg Turns -->
+                </div>
+
+                <!-- Top Card Pairings (Strongest Together) -->
+                <div class="sim-section-block">
+                  <div class="sim-section-header">
+                    <span class="sim-section-title">🤝 Top Card Pairings (Strongest Together)</span>
+                    <span class="sim-section-hint">Identified by win rate correlation & synergy lift (+Δ%) when drawn together</span>
+                  </div>
+                  <div class="sim-pairings-list" id="simPairingsList">
+                    <!-- Top Card Pairs -->
+                  </div>
+                </div>
+
+                <!-- Key Combo Execution & Lethality -->
+                <div class="sim-section-block">
+                  <div class="sim-section-header">
+                    <span class="sim-section-title">💥 Key Combo Execution & Win Rate</span>
+                    <span class="sim-section-hint">How often combos trigger and their win rate when executed</span>
+                  </div>
+                  <div class="sim-combos-list" id="simCombosList">
+                    <!-- Ranked Combos with Win Rate and Execution Rate -->
+                  </div>
+                </div>
+              </div>
+
               <!-- Strategic Role Gaps & Smart Recommendations -->
               <div class="analytics-card recommendations-card" id="deckRecommendationsCard">
                 <div class="card-header-flex">
@@ -694,6 +747,7 @@
   <script src="src/math/hypergeometric.js"></script>
   <script src="src/math/combat_breakpoints.js"></script>
   <script src="src/math/se_simulator.js"></script>
+  <script src="src/math/matchup_simulator.js"></script>
   <script src="src/engine/matchup_evaluator.js"></script>
   <script src="src/engine/synergy-worker.js"></script>
   <script src="app.js"></script>

@@ -1,0 +1,961 @@
+[
+  {
+    "id": "CMB-ALLURE-01",
+    "name": "Allure Defensive Wall Trap",
+    "archetype": "Forced Combat Trap",
+    "primaryCard": "Allure",
+    "partnerCards": [
+      "Defensive Posture",
+      "Armor of Clay",
+      "Risho"
+    ],
+    "rating": {
+      "overallScore": 89,
+      "tier": "A-Tier",
+      "lethality": 65,
+      "consistency": 94,
+      "efficiency": 95,
+      "disruption": 92
+    },
+    "synergyType": "forced_attack_trap",
+    "damagePotential": "Wasted Turn & Zero Wounds",
+    "tacticalExplanation": "Play Allure (0 SE) to compel your opponent to attack on their next turn. Pre-emptively play Defensive Posture (+3000 DEF) or equip Armor of Clay to Risho to push your Arena DEF to 8,000\u201310,000. The opponent is forced to declare an attack, paying discard costs into an impenetrable wall for 0 wounds.",
+    "tacticalPlaybook": {
+      "setup": "Place high DEF character (Risho or attached with Armor) in Arena; hold Defensive Posture.",
+      "execution": "Play Allure for 0 SE during your Main Step, then activate Defensive Posture for +3000 DEF until your next Draw Step.",
+      "payoff": "Opponent must declare an attack, forced to waste cards from hand to pay attack costs while dealing 0 damage."
+    },
+    "tags": [
+      "allure",
+      "defense",
+      "forced_attack",
+      "resource_denial",
+      "trap"
+    ]
+  },
+  {
+    "id": "CMB-ALLURE-02",
+    "name": "Allure Hand Starvation Lock (4-Card Draw)",
+    "archetype": "Hand Lockout & Starvation",
+    "primaryCard": "Allure",
+    "partnerCards": [
+      "Empowered Emotions",
+      "Chu, the Team Captain",
+      "Zombies on the Hunt"
+    ],
+    "rating": {
+      "overallScore": 96,
+      "tier": "S-Tier",
+      "lethality": 85,
+      "consistency": 82,
+      "efficiency": 92,
+      "disruption": 98
+    },
+    "synergyType": "hand_starvation",
+    "damagePotential": "+4 Card Draw Bomb (+3 Net Hand Delta)",
+    "tacticalExplanation": "With Team Uraotogi bonus active, strip your opponent's hand using Empowered Emotions or Zombies on the Hunt, or hike their attack costs via Chu's Buzz Attack (+1 Cost). Then play Allure. Because the opponent has 0 cards or cannot pay the attack cost, they cannot declare an attack\u2014triggering Allure's condition to draw 4 cards immediately!",
+    "tacticalPlaybook": {
+      "setup": "Activate Team Uraotogi bonus. Use hand disruption (Empowered Emotions) to deplete opponent's hand to 0.",
+      "execution": "Cast Allure (0 SE). Pass turn to opponent.",
+      "payoff": "Opponent has no cards to pay attack discard costs and cannot attack. Allure triggers: you draw 4 cards immediately!"
+    },
+    "tags": [
+      "allure",
+      "card_draw",
+      "hand_lockout",
+      "team_uraotogi",
+      "game_swing"
+    ]
+  },
+  {
+    "id": "CMB-ALLURE-03",
+    "name": "Allure Retaliation Counter-Burst",
+    "archetype": "Retaliation & Counter-Attack",
+    "primaryCard": "Allure",
+    "partnerCards": [
+      "Yusuke, Unleashed",
+      "Persevere"
+    ],
+    "rating": {
+      "overallScore": 87,
+      "tier": "A-Tier",
+      "lethality": 94,
+      "consistency": 82,
+      "efficiency": 88,
+      "disruption": 80
+    },
+    "synergyType": "damage_reaction",
+    "damagePotential": "8,000 ATK Lethal Retaliation",
+    "tacticalExplanation": "Play Allure to force the opponent to attack Yusuke, Unleashed. Once Yusuke receives 1 point of damage, his devastating 8,000 ATK 'Enraged' attack is unlocked for your next turn, turning opponent aggression into your lethal counter-attack.",
+    "tacticalPlaybook": {
+      "setup": "Place Yusuke, Unleashed in the Arena; ensure you have 2 SE ready for next turn.",
+      "execution": "Cast Allure (0 SE). Opponent is compelled to attack and inflict 1 damage to Yusuke.",
+      "payoff": "On your turn, Yusuke activates Enraged: 8,000 base ATK for only 2 cost, crushing the opponent's fighter."
+    },
+    "tags": [
+      "allure",
+      "retaliation",
+      "yusuke",
+      "burst_damage",
+      "counter"
+    ]
+  },
+  {
+    "id": "CMB-ALLURE-04",
+    "name": "Allure Tainted Glare Nullification",
+    "archetype": "Damage Prevention Trap",
+    "primaryCard": "Allure",
+    "partnerCards": [
+      "Yusuke's Tainted Glare",
+      "Hiei's Tainted Glare",
+      "Kurama's Tainted Glare"
+    ],
+    "rating": {
+      "overallScore": 85,
+      "tier": "B-Tier",
+      "lethality": 60,
+      "consistency": 89,
+      "efficiency": 90,
+      "disruption": 92
+    },
+    "synergyType": "damage_prevention",
+    "damagePotential": "Complete Damage Nullification",
+    "tacticalExplanation": "Attach Tainted Glare to your starting fighter to grant passive damage prevention (-1 point of damage). Playing Allure forces the opponent to burn their attack and hand cards into a guaranteed negated strike.",
+    "tacticalPlaybook": {
+      "setup": "Attach corresponding Tainted Glare item to your active Hero fighter.",
+      "execution": "Play Allure (0 SE).",
+      "payoff": "Opponent must attack, but when damage is dealt, Tainted Glare prevents 1 point of damage, completely neutralizing standard attacks."
+    },
+    "tags": [
+      "allure",
+      "damage_prevention",
+      "tainted_glare",
+      "anti_aggro"
+    ]
+  },
+  {
+    "id": "CMB-BURST-01",
+    "name": "Overwhelming 4-Wound Annihilation",
+    "archetype": "Burst Lethal KO",
+    "primaryCard": "Overwhelming Kill",
+    "partnerCards": [
+      "No Mercy",
+      "Younger Toguro",
+      "Malevolent Glare"
+    ],
+    "rating": {
+      "overallScore": 98,
+      "tier": "S-Tier",
+      "lethality": 100,
+      "consistency": 85,
+      "efficiency": 84,
+      "disruption": 75
+    },
+    "synergyType": "damage_multiplier",
+    "damagePotential": "4 Points of Damage (Instant Match KO)",
+    "tacticalExplanation": "The premier OTK combo in Score YYH TCG. Combine Toguro Team Bonus (+6000 ATK for 2 discards) with No Mercy (+4000 ATK) and Younger Toguro's Surprising Strength (+1000 ATK) to push attack power to 16,000\u201318,000+. When attack power is >= 4x the defender's DEF (e.g. 4,000 DEF), Overwhelming Kill deals 4 points of damage in one hit, wiping out the entire match on Turn 2!",
+    "tacticalPlaybook": {
+      "setup": "Younger Toguro in Arena with Team Toguro bonus active; 2 SE in bank.",
+      "execution": "Play Overwhelming Kill (2 SE) and No Mercy (1 SE). Declare attack, discarding 2 cards for Toguro's +6,000 ATK.",
+      "payoff": "Total ATK reaches 16,000\u201318,000 (>4x 4000 DEF). Overwhelming Kill resolves: 4 points of damage dealt! Immediate Match Win."
+    },
+    "tags": [
+      "overwhelming_kill",
+      "toguro",
+      "no_mercy",
+      "4_wounds",
+      "otk",
+      "s_tier"
+    ]
+  },
+  {
+    "id": "CMB-BURST-02",
+    "name": "Overpowered Sideline Board Wipe",
+    "archetype": "Area of Effect Board Wipe",
+    "primaryCard": "Overpowered",
+    "partnerCards": [
+      "Overwhelming Kill",
+      "No Mercy",
+      "Younger Toguro"
+    ],
+    "rating": {
+      "overallScore": 92,
+      "tier": "S-Tier",
+      "lethality": 96,
+      "consistency": 78,
+      "efficiency": 82,
+      "disruption": 95
+    },
+    "synergyType": "board_wipe",
+    "damagePotential": "1 Damage to ALL Opponent Characters",
+    "tacticalExplanation": "When hitting the 4x DEF requirement with Overwhelming Kill, Overpowered allows you to deal 1 point of damage to EVERY character your opponent controls (both Arena and all Sideline slots). This simultaneously weakens the entire enemy team, breaking defensive stalemates across future matches.",
+    "tacticalPlaybook": {
+      "setup": "Meet 4x DEF condition using Overwhelming Kill and heavy combat pumps.",
+      "execution": "Play Overpowered (0 SE) during Main Step alongside Overwhelming Kill.",
+      "payoff": "Inflicts 1 damage across the opponent's active fighter and all 3 sideline characters, destroying enemy match pacing."
+    },
+    "tags": [
+      "overpowered",
+      "overwhelming_kill",
+      "board_wipe",
+      "sideline_damage"
+    ]
+  },
+  {
+    "id": "CMB-BURST-03",
+    "name": "Alley Fight Spirit Cataclysm",
+    "archetype": "Spirit Ramp Finisher",
+    "primaryCard": "Alley Fight for Eikichi",
+    "partnerCards": [
+      "All For One and One For All",
+      "Feast of Souls",
+      "Idunn Box"
+    ],
+    "rating": {
+      "overallScore": 95,
+      "tier": "S-Tier",
+      "lethality": 98,
+      "consistency": 85,
+      "efficiency": 90,
+      "disruption": 70
+    },
+    "synergyType": "resource_ramp_finisher",
+    "damagePotential": "+8,000 to +12,000 ATK Spike",
+    "tacticalExplanation": "Alley Fight for Eikichi grants +1000 ATK for EVERY Spirit Energy you have by discarding your remaining hand down to 1 card. By banking 8\u201310 SE via All For One (+3 SE) or Feast of Souls, Alley Fight yields an astronomical +8,000 to +10,000 ATK spike that guarantees double-damage KOs against even 8,000 DEF tanks.",
+    "tacticalPlaybook": {
+      "setup": "Ramp Spirit Energy to 7+ using Team Urameshi bonus, All For One, or Idunn Box.",
+      "execution": "Play Alley Fight for Eikichi (0 SE). Discard all but 1 hand card.",
+      "payoff": "Attacks gain +1,000 ATK per banked SE (+8k to +10k ATK total). Decimates defender for automatic 2-wound lethal KO."
+    },
+    "tags": [
+      "alley_fight",
+      "spirit_energy",
+      "ramp",
+      "burst_damage",
+      "eikichi"
+    ]
+  },
+  {
+    "id": "CMB-BURST-04",
+    "name": "Rose Whip Double-Damage Lethal",
+    "archetype": "Burst Lethal KO",
+    "primaryCard": "Rose Whip",
+    "partnerCards": [
+      "Kurama",
+      "Kurama, Reformed Demon",
+      "Efflux"
+    ],
+    "rating": {
+      "overallScore": 91,
+      "tier": "A-Tier",
+      "lethality": 95,
+      "consistency": 82,
+      "efficiency": 85,
+      "disruption": 70
+    },
+    "synergyType": "damage_multiplier",
+    "damagePotential": "Doubles Total Attack Value (up to 14,000+ ATK)",
+    "tacticalExplanation": "Attach Rose Whip to Kurama. During combat, stack baseline attack buffs (Efflux +3000), then discard Rose Whip to DOUBLE the final Attack Value of Kurama's attack. Turning a 6,000\u20137,000 attack into 12,000\u201314,000 ATK effortlessly crosses 2-wound thresholds.",
+    "tacticalPlaybook": {
+      "setup": "Attach Rose Whip to Kurama in Arena.",
+      "execution": "Play attack pump (Efflux). Declare Kurama attack, then discard Rose Whip to double final ATK.",
+      "payoff": "Doubled attack crushes opponent's DEF for guaranteed 2 wounds (match victory)."
+    },
+    "tags": [
+      "rose_whip",
+      "kurama",
+      "damage_multiplier",
+      "item_sacrifice"
+    ]
+  },
+  {
+    "id": "CMB-BURST-05",
+    "name": "Hiei Sword Mastery Overdrive",
+    "archetype": "Item Weapon Stacking",
+    "primaryCard": "Hiei's Sword Mastery",
+    "partnerCards": [
+      "Ogre Killer",
+      "Shadow Sword",
+      "Hiei, the Swordsman"
+    ],
+    "rating": {
+      "overallScore": 88,
+      "tier": "A-Tier",
+      "lethality": 90,
+      "consistency": 86,
+      "efficiency": 92,
+      "disruption": 70
+    },
+    "synergyType": "item_enhancement",
+    "damagePotential": "+6,000 ATK Weapon Strike",
+    "tacticalExplanation": "Attach Ogre Killer (+3000 ATK) or high-stat weapon item to your active fighter. Play Hiei's Sword Mastery (0 SE) to double the +Attack Value granted by the item, boosting total attack output by +6,000 ATK without spending additional Spirit Energy.",
+    "tacticalPlaybook": {
+      "setup": "Attach Ogre Killer (+3000 ATK) to Arena character.",
+      "execution": "Cast Hiei's Sword Mastery (0 SE) during Main Step, targeting Ogre Killer.",
+      "payoff": "Item grants +6,000 ATK for the rest of turn, creating massive single-card combat superiority."
+    },
+    "tags": [
+      "hiei",
+      "sword_mastery",
+      "ogre_killer",
+      "weapon_stacking"
+    ]
+  },
+  {
+    "id": "CMB-BURST-06",
+    "name": "Improvised Weapon Explosive Strike",
+    "archetype": "Item Sacrifice Burst",
+    "primaryCard": "Improvised Weapon",
+    "partnerCards": [
+      "Botan's Tool Box",
+      "Armor of Clay",
+      "Karasu"
+    ],
+    "rating": {
+      "overallScore": 86,
+      "tier": "A-Tier",
+      "lethality": 88,
+      "consistency": 87,
+      "efficiency": 88,
+      "disruption": 72
+    },
+    "synergyType": "item_sacrifice",
+    "damagePotential": "+4,000 ATK Combat Pump",
+    "tacticalExplanation": "Equip a cheap or expendable item (like Armor of Clay or Botan's Tool Box). On your attack declaration, discard the attached item via Improvised Weapon (0 SE) to grant your attacks +4,000 Attack Value for the turn, with Karasu later recycling the discarded item.",
+    "tacticalPlaybook": {
+      "setup": "Attach expendable item to Arena character.",
+      "execution": "Play Improvised Weapon (0 SE). Upon attack declaration, discard the item.",
+      "payoff": "Gains +4,000 ATK, bridging the gap to double-damage against 6,000\u20138,000 DEF opponents."
+    },
+    "tags": [
+      "improvised_weapon",
+      "item_sacrifice",
+      "karasu",
+      "combat_pump"
+    ]
+  },
+  {
+    "id": "CMB-BURST-07",
+    "name": "Guru Technique Swarm",
+    "archetype": "Technique Voltron",
+    "primaryCard": "Guru of Engagement",
+    "partnerCards": [
+      "Rubber Slam",
+      "Shotgun",
+      "Genkai, the Mentor"
+    ],
+    "rating": {
+      "overallScore": 90,
+      "tier": "A-Tier",
+      "lethality": 92,
+      "consistency": 85,
+      "efficiency": 90,
+      "disruption": 72
+    },
+    "synergyType": "technique_synergy",
+    "damagePotential": "+6,000 to +8,000 ATK from Hand",
+    "tacticalExplanation": "In Team Genkai technique toolbox decks, stock 3\u20134 technique cards in hand. Play Guru of Engagement (0 SE) to reveal your hand; each technique revealed adds +2000 Attack Value to your attacks this turn (+6,000 to +8,000 ATK total) without discarding them!",
+    "tacticalPlaybook": {
+      "setup": "Accumulate 3 or 4 technique cards in hand via Team Genkai card filtering.",
+      "execution": "Cast Guru of Engagement (0 SE) and reveal hand to opponent.",
+      "payoff": "Gain +6,000 to +8,000 ATK while keeping all technique cards in hand to attach or use as discard costs."
+    },
+    "tags": [
+      "guru_of_engagement",
+      "genkai",
+      "technique",
+      "burst_damage"
+    ]
+  },
+  {
+    "id": "CMB-BURST-08",
+    "name": "Flurry of Blows Spellchain Overwhelm",
+    "archetype": "Spell Velocity Aggro",
+    "primaryCard": "Flurry of Blows",
+    "partnerCards": [
+      "Feast of Souls",
+      "Idunn Box",
+      "Efflux"
+    ],
+    "rating": {
+      "overallScore": 87,
+      "tier": "A-Tier",
+      "lethality": 88,
+      "consistency": 86,
+      "efficiency": 92,
+      "disruption": 70
+    },
+    "synergyType": "spellchain_boost",
+    "damagePotential": "+4,000 to +5,000 ATK Chained Velocity",
+    "tacticalExplanation": "Flurry of Blows grants your attacks +1000 ATK for every card played after it during your Main Step. By chaining low or zero-cost events (Feast of Souls, Idunn Box, Efflux), your fighter stacks rapid cumulative attack increments for lethal combat scaling.",
+    "tacticalPlaybook": {
+      "setup": "Hold 3-4 low-cost events in hand.",
+      "execution": "Play Flurry of Blows (0 SE) as your very first card in the Main Step, then cast your remaining events.",
+      "payoff": "Each card adds +1000 ATK, scaling into a massive turn-ending attack burst."
+    },
+    "tags": [
+      "flurry_of_blows",
+      "spellchain",
+      "combo",
+      "velocity"
+    ]
+  },
+  {
+    "id": "CMB-BURST-09",
+    "name": "Earthquake Match Slot Catastrophe",
+    "archetype": "Position Manipulation",
+    "primaryCard": "Earth Shinobi",
+    "partnerCards": [
+      "All For One and One For All",
+      "Feast of Souls"
+    ],
+    "rating": {
+      "overallScore": 92,
+      "tier": "S-Tier",
+      "lethality": 98,
+      "consistency": 78,
+      "efficiency": 80,
+      "disruption": 95
+    },
+    "synergyType": "slot_manipulation_lethal",
+    "damagePotential": "12,000 Baseline Attack & Slot Switch",
+    "tacticalExplanation": "Earth Shinobi packs a massive 12,000 ATK 'Earthquake' (5 cost). On use, you can force 1 of your opponent's sidelined characters to switch with their fighter, pulling a vulnerable low-DEF tech character into the arena and immediately executing a 2-wound lethal blowout.",
+    "tacticalPlaybook": {
+      "setup": "Bank 5 SE and field Earth Shinobi in Arena.",
+      "execution": "Declare Earthquake (12,000 ATK). Select opponent's lowest-DEF sideline character to swap in.",
+      "payoff": "12,000 ATK smashes the newly swapped target (typically 3,000\u20134,000 DEF) for an unavoidable 2-wound match KO."
+    },
+    "tags": [
+      "earth_shinobi",
+      "earthquake",
+      "team_masho",
+      "12k_atk",
+      "slot_swap"
+    ]
+  },
+  {
+    "id": "CMB-BURST-10",
+    "name": "Wind Shinobi Twister Sniping",
+    "archetype": "Sideline Assassination",
+    "primaryCard": "Wind Shinobi",
+    "partnerCards": [
+      "Efflux",
+      "Guru of Engagement"
+    ],
+    "rating": {
+      "overallScore": 86,
+      "tier": "A-Tier",
+      "lethality": 85,
+      "consistency": 88,
+      "efficiency": 88,
+      "disruption": 92
+    },
+    "synergyType": "sideline_sniping",
+    "damagePotential": "Bypasses Arena Fighter to KO Sideline",
+    "tacticalExplanation": "Wind Shinobi's Twister (2 cost, 6000 ATK) allows you to bypass the opponent's active Arena fighter and directly attack the character in their 2nd or 4th match slot. Buffing Twister by +2000\u20133000 ATK snipes essential enemy sideline engines before they ever enter the arena.",
+    "tacticalPlaybook": {
+      "setup": "Identify crucial enemy sideline utility character (e.g. Yukina or Botan).",
+      "execution": "Play attack buff (Efflux), declare Twister targeting their 2nd or 4th slot.",
+      "payoff": "Inflicts lethal damage to the backline, eliminating the opponent's support pillar."
+    },
+    "tags": [
+      "wind_shinobi",
+      "twister",
+      "sniping",
+      "sideline",
+      "team_masho"
+    ]
+  },
+  {
+    "id": "CMB-BURST-11",
+    "name": "Desperate Assault Villain Punisher",
+    "archetype": "Anti-Villain Beatdown",
+    "primaryCard": "Desperate Assault",
+    "partnerCards": [
+      "Yusuke, Resurrected",
+      "Kuwabara",
+      "Kurama"
+    ],
+    "rating": {
+      "overallScore": 88,
+      "tier": "A-Tier",
+      "lethality": 90,
+      "consistency": 86,
+      "efficiency": 96,
+      "disruption": 80
+    },
+    "synergyType": "conditional_burst",
+    "damagePotential": "6,000 ATK for 0 Cost + Draw 2 Cards",
+    "tacticalExplanation": "Desperate Assault costs 0 SE. When used against a villain fighter, its attack leaps from 3000 to 6000 ATK, and if attached to a Hero, you immediately draw 2 cards. Against Toguro or Masho villains, it provides immense tempo, free cards, and 6k base attack for zero discard cost.",
+    "tacticalPlaybook": {
+      "setup": "Hero fighter in Arena facing an opponent villain.",
+      "execution": "Attach and declare Desperate Assault (0 attack cost).",
+      "payoff": "Attacks for 6,000 ATK and draws 2 cards, gaining card advantage while applying lethal pressure."
+    },
+    "tags": [
+      "desperate_assault",
+      "anti_villain",
+      "hero",
+      "card_draw",
+      "0_cost"
+    ]
+  },
+  {
+    "id": "CMB-DEF-01",
+    "name": "Clay Armor Fortress",
+    "archetype": "Defensive Fortress",
+    "primaryCard": "Armor of Clay",
+    "partnerCards": [
+      "Risho",
+      "Risho, Butajiri's Henchman",
+      "Defensive Posture"
+    ],
+    "rating": {
+      "overallScore": 92,
+      "tier": "S-Tier",
+      "lethality": 60,
+      "consistency": 95,
+      "efficiency": 94,
+      "disruption": 94
+    },
+    "synergyType": "defense_wall",
+    "damagePotential": "10,000+ Unbreakable DEF",
+    "tacticalExplanation": "Armor of Clay specifically grants +3000 Defense Value when attached to Risho (base 5000 DEF). Combined with Risho's Earthen Armor attack (+2000 DEF) and Defensive Posture (+3000 DEF), Risho reaches 10,000\u201313,000 DEF, rendering him immune to 2-wound KOs even against Toguro's full burst.",
+    "tacticalPlaybook": {
+      "setup": "Place Risho in Arena slot 1.",
+      "execution": "Attach Armor of Clay (+3000 DEF) and use Earthen Armor (+2000 DEF).",
+      "payoff": "Risho's DEF scales to 10,000+, shutting down opposing aggro strategies and bleeding enemy attack discards."
+    },
+    "tags": [
+      "risho",
+      "armor_of_clay",
+      "defensive_wall",
+      "masho"
+    ]
+  },
+  {
+    "id": "CMB-DEF-02",
+    "name": "Armor Abuse Juggernaut",
+    "archetype": "Armor Stacking",
+    "primaryCard": "Kuro Momotaro",
+    "partnerCards": [
+      "Armor of the Ape",
+      "Armor of Clay"
+    ],
+    "rating": {
+      "overallScore": 88,
+      "tier": "A-Tier",
+      "lethality": 85,
+      "consistency": 86,
+      "efficiency": 88,
+      "disruption": 82
+    },
+    "synergyType": "item_stacking",
+    "damagePotential": "+2000 ATK / +2000 DEF Scaling",
+    "tacticalExplanation": "Kuro Momotaro's Armor Abuse gains +1000 ATK and +1000 DEF for each attached card with 'Armor' in the title. Equipping Armor of the Ape and Armor of Clay turns Kuro Momotaro into a dual-threat tank with 7,000+ DEF and 6,000+ unbuffed attack swings.",
+    "tacticalPlaybook": {
+      "setup": "Place Kuro Momotaro in Arena with Team Uraotogi bonus for item support.",
+      "execution": "Attach Armor of Clay and Armor of the Ape.",
+      "payoff": "Passive +2000 ATK and +2000 DEF stacking simultaneously shields your character and boosts attack power."
+    },
+    "tags": [
+      "kuro_momotaro",
+      "armor",
+      "uraotogi",
+      "stat_scaling"
+    ]
+  },
+  {
+    "id": "CMB-DEF-03",
+    "name": "Shadow Control Attack Lockout",
+    "archetype": "Territory Lockout",
+    "primaryCard": "Asato Kido, Shadow Master",
+    "partnerCards": [
+      "Yuu Kaitou's Territory",
+      "Desperate Assault"
+    ],
+    "rating": {
+      "overallScore": 87,
+      "tier": "A-Tier",
+      "lethality": 75,
+      "consistency": 82,
+      "efficiency": 85,
+      "disruption": 96
+    },
+    "synergyType": "attack_lockout",
+    "damagePotential": "Complete Opponent Attack Lockout",
+    "tacticalExplanation": "Asato Kido's Shadow Control effect dictates that while a Territory is in play, the opponent may not attack you if you dealt their fighter damage this turn. Dealing even minimum damage locks the opponent out of attacking during their subsequent turn.",
+    "tacticalPlaybook": {
+      "setup": "Play Territory card and place Asato Kido in Arena.",
+      "execution": "Deal at least 1 point of damage to the opponent's active fighter.",
+      "payoff": "Shadow Control triggers: opponent is completely barred from declaring an attack on their next turn."
+    },
+    "tags": [
+      "asato_kido",
+      "territory",
+      "lockout",
+      "control"
+    ]
+  },
+  {
+    "id": "CMB-RES-01",
+    "name": "All For One Mono-Team Battery",
+    "archetype": "Spirit Ramp & Battery",
+    "primaryCard": "All For One and One For All",
+    "partnerCards": [
+      "Feast of Souls",
+      "Kitty Love",
+      "Alley Fight for Eikichi"
+    ],
+    "rating": {
+      "overallScore": 97,
+      "tier": "S-Tier",
+      "lethality": 85,
+      "consistency": 96,
+      "efficiency": 100,
+      "disruption": 70
+    },
+    "synergyType": "resource_ramp",
+    "damagePotential": "+3 Spirit Energy & +1 Card Draw for 0 SE",
+    "tacticalExplanation": "The single most efficient ramp card in Score YYH TCG. Running a mono-team (all 4 starting characters share the same team symbol) enables All For One and One For All for 0 SE cost, immediately granting +3 Spirit Energy AND replacing itself with 1 card draw. Accelerates Turn 2 lethal plays.",
+    "tacticalPlaybook": {
+      "setup": "Field 4 starting characters of the same team symbol (e.g. 4 Urameshi or 4 Toguro).",
+      "execution": "Cast All For One and One For All (0 SE) on Turn 1 or 2.",
+      "payoff": "Instantly ramps to 4\u20135 SE on Turn 1, fueling high-cost events and techniques multiple turns early."
+    },
+    "tags": [
+      "all_for_one",
+      "ramp",
+      "spirit_energy",
+      "card_draw",
+      "s_tier"
+    ]
+  },
+  {
+    "id": "CMB-RES-02",
+    "name": "Priceless Tears Hand Engine",
+    "archetype": "Card Advantage Engine",
+    "primaryCard": "Yukina, Ice Princess",
+    "partnerCards": [
+      "Heroic Team",
+      "Kitty Love",
+      "Captured Souls"
+    ],
+    "rating": {
+      "overallScore": 91,
+      "tier": "A-Tier",
+      "lethality": 70,
+      "consistency": 89,
+      "efficiency": 94,
+      "disruption": 75
+    },
+    "synergyType": "draw_engine",
+    "damagePotential": "Draw 3 Cards for 1 Attack Cost",
+    "tacticalExplanation": "Yukina, Ice Princess's Priceless Tears attack costs 1 card and draws 3 cards whenever you have more heroes on your Sideline than your opponent (+2 net card advantage). Provides unmatched hand refueling in hero-heavy decks.",
+    "tacticalPlaybook": {
+      "setup": "Ensure 2\u20133 Hero characters on Sideline and place Yukina in Arena.",
+      "execution": "Declare Priceless Tears (1 discard cost).",
+      "payoff": "Immediately draw 3 cards, refueling your hand to fund future attack discard costs and combos."
+    },
+    "tags": [
+      "yukina",
+      "priceless_tears",
+      "card_draw",
+      "hero_engine"
+    ]
+  },
+  {
+    "id": "CMB-RES-03",
+    "name": "Captured Souls Territory Draw Engine",
+    "archetype": "Card Advantage Engine",
+    "primaryCard": "Captured Souls",
+    "partnerCards": [
+      "Yuu Kaitou's Territory",
+      "Botan's Tool Box"
+    ],
+    "rating": {
+      "overallScore": 88,
+      "tier": "A-Tier",
+      "lethality": 65,
+      "consistency": 86,
+      "efficiency": 88,
+      "disruption": 80
+    },
+    "synergyType": "infinite_draw_recycle",
+    "damagePotential": "Repeatable +2 Card Draw Loop",
+    "tacticalExplanation": "Captured Souls lets you discard it to draw 2 cards. With Yuu Kaitou's Territory in play, instead of going to the Discard Pile, it shuffles right back into your deck after use, creating an ongoing card draw recursion engine.",
+    "tacticalPlaybook": {
+      "setup": "Have Yuu Kaitou's Territory in play.",
+      "execution": "Equip and discard Captured Souls during Draw Step.",
+      "payoff": "Draw 2 cards and shuffle Captured Souls back into your deck to redraw and repeat."
+    },
+    "tags": [
+      "captured_souls",
+      "territory",
+      "draw_loop",
+      "recycle"
+    ]
+  },
+  {
+    "id": "CMB-RES-04",
+    "name": "Heroic Team Infinite Bottom-Deck Loop",
+    "archetype": "Recursive Draw Engine",
+    "primaryCard": "Heroic Team",
+    "partnerCards": [
+      "Yusuke, Resurrected",
+      "Kuwabara",
+      "Kurama"
+    ],
+    "rating": {
+      "overallScore": 93,
+      "tier": "S-Tier",
+      "lethality": 82,
+      "consistency": 94,
+      "efficiency": 95,
+      "disruption": 80
+    },
+    "synergyType": "bottom_deck_loop",
+    "damagePotential": "Infinite Draw Loop of Discarded Attack Costs",
+    "tacticalExplanation": "With Team Urameshi bonus, cards discarded to pay attack costs go to the bottom of your deck instead of the discard pile. Playing Heroic Team allows you to draw from the BOTTOM of your deck whenever you draw a card! This creates an infinite recycling loop: attack discard costs cycle immediately back into your hand on your next turn.",
+    "tacticalPlaybook": {
+      "setup": "Field 4 Team Urameshi starting characters.",
+      "execution": "Play Heroic Team (1 SE).",
+      "payoff": "Discard attack costs to bottom of deck; draw them right back into hand next turn, achieving permanent hand recursion."
+    },
+    "tags": [
+      "heroic_team",
+      "team_urameshi",
+      "bottom_deck",
+      "infinite_loop",
+      "s_tier"
+    ]
+  },
+  {
+    "id": "CMB-RES-05",
+    "name": "Koenma Young Ruler Multi-Team Bonus Scale",
+    "archetype": "Team Multiplier Finisher",
+    "primaryCard": "Koenma, Young Ruler",
+    "partnerCards": [
+      "Dr. Ichigaki",
+      "Evil Tendencies"
+    ],
+    "rating": {
+      "overallScore": 87,
+      "tier": "A-Tier",
+      "lethality": 94,
+      "consistency": 80,
+      "efficiency": 90,
+      "disruption": 72
+    },
+    "synergyType": "team_bonus_multiplier",
+    "damagePotential": "+5,000 to +10,000 ATK Scaler",
+    "tacticalExplanation": "Koenma, Young Ruler's Rule attack gains +5000 Attack Value for EACH Team Bonus you possess. In hybrid lineups unlocking multiple team traits, this attack scales instantly into a 10,000+ ATK hammer for 1 discard cost.",
+    "tacticalPlaybook": {
+      "setup": "Activate 1 or 2 Team Bonuses through leader traits.",
+      "execution": "Declare Rule attack (1 cost).",
+      "payoff": "Gains +5,000 ATK per bonus, easily overpowering opposing defenders."
+    },
+    "tags": [
+      "koenma",
+      "young_ruler",
+      "team_bonus",
+      "scaling"
+    ]
+  },
+  {
+    "id": "CMB-REC-01",
+    "name": "Spirit Sword Discard Recycle",
+    "archetype": "Graveyard Recursion",
+    "primaryCard": "Kuwabara, Street Fighter",
+    "partnerCards": [
+      "Spirit Sword Monster Beast Donut",
+      "Abnormal Endurance"
+    ],
+    "rating": {
+      "overallScore": 86,
+      "tier": "A-Tier",
+      "lethality": 80,
+      "consistency": 91,
+      "efficiency": 88,
+      "disruption": 75
+    },
+    "synergyType": "graveyard_recycle",
+    "damagePotential": "Recycles 2\u20133 Cards per Attack",
+    "tacticalExplanation": "Both Kuwabara, Street Fighter and Spirit Sword Monster Beast Donut shuffle cards from your Discard Pile back into your Deck upon attacking. This keeps your deck permanently replenished against mill strategies and recycles high-impact combat cards.",
+    "tacticalPlaybook": {
+      "setup": "Place Kuwabara, Street Fighter in Arena; attach Spirit Sword Monster Beast Donut.",
+      "execution": "Declare Alley Brawling or For Yukina's Love attacks.",
+      "payoff": "Shuffles 1\u20132 key cards from Discard Pile back into Deck with every strike, preventing deckout and looping finishers."
+    },
+    "tags": [
+      "kuwabara",
+      "spirit_sword",
+      "recycle",
+      "graveyard_loop"
+    ]
+  },
+  {
+    "id": "CMB-REC-02",
+    "name": "Flashback Event Rebirth",
+    "archetype": "Event Recycling",
+    "primaryCard": "Flashback",
+    "partnerCards": [
+      "All For One and One For All",
+      "Overwhelming Kill",
+      "Kitty Love"
+    ],
+    "rating": {
+      "overallScore": 90,
+      "tier": "A-Tier",
+      "lethality": 85,
+      "consistency": 87,
+      "efficiency": 92,
+      "disruption": 78
+    },
+    "synergyType": "event_recursion",
+    "damagePotential": "Recycles 4 High-Impact Events (Limit 1 Cards)",
+    "tacticalExplanation": "Flashback costs only 1 SE and shuffles up to 4 non-Flashback event cards from your Discard Pile back into your Deck. Re-stocks lethal limit-1 cards like Overwhelming Kill, Burst of Power, and All For One for late-game reuse.",
+    "tacticalPlaybook": {
+      "setup": "Accumulate played events in Discard Pile.",
+      "execution": "Cast Flashback (1 SE) as the final action of your Main Step.",
+      "payoff": "4 premier events return to deck, giving you second copies of game-winning spells."
+    },
+    "tags": [
+      "flashback",
+      "event_recycle",
+      "limit_1",
+      "consistency"
+    ]
+  },
+  {
+    "id": "CMB-REC-03",
+    "name": "Botan's Tool Box Item Workshop",
+    "archetype": "Item Toolbox Recycling",
+    "primaryCard": "Botan's Tool Box",
+    "partnerCards": [
+      "Rose Whip",
+      "Ogre Killer",
+      "Karasu"
+    ],
+    "rating": {
+      "overallScore": 87,
+      "tier": "A-Tier",
+      "lethality": 82,
+      "consistency": 89,
+      "efficiency": 95,
+      "disruption": 70
+    },
+    "synergyType": "item_recycle",
+    "damagePotential": "Recovers 5 Items to Deck for 0 SE",
+    "tacticalExplanation": "Botan's Tool Box costs 0 SE to deploy. Discarding it shuffles up to 5 items from your Discard Pile back into your Deck. Perfect for recovering sacrificed items like Rose Whip, Improvised Weapon fodder, and weapon attachments.",
+    "tacticalPlaybook": {
+      "setup": "Use item sacrifice abilities (Rose Whip, Improvised Weapon).",
+      "execution": "Deploy and discard Botan's Tool Box (0 SE) during Draw Step.",
+      "payoff": "Shuffles 5 discarded items back into deck, re-enabling weapon stacking loops."
+    },
+    "tags": [
+      "botans_tool_box",
+      "item_recycle",
+      "karasu",
+      "rose_whip"
+    ]
+  },
+  {
+    "id": "CMB-LOCK-01",
+    "name": "Deadly Gash Hand Squeeze",
+    "archetype": "Hand Destruction",
+    "primaryCard": "Hiei, the Swordsman",
+    "partnerCards": [
+      "Zombies on the Hunt",
+      "Empowered Emotions"
+    ],
+    "rating": {
+      "overallScore": 91,
+      "tier": "A-Tier",
+      "lethality": 86,
+      "consistency": 91,
+      "efficiency": 88,
+      "disruption": 98
+    },
+    "synergyType": "hand_destruction",
+    "damagePotential": "Discards 2 Opponent Hand Cards per Turn",
+    "tacticalExplanation": "Hiei, the Swordsman forces opponent hand discards with both Precise Strike (1 cost) and Deadly Gash (2 cost). Layering Zombies on the Hunt and Empowered Emotions empties the opponent's hand, preventing them from paying attack costs and securing total combat dominance.",
+    "tacticalPlaybook": {
+      "setup": "Field Hiei, the Swordsman in Arena.",
+      "execution": "Attack with Deadly Gash (opponent discards 2 cards). Follow up with Zombies on the Hunt.",
+      "payoff": "Opponent hand is stripped to 0, completely disabling their attack declaration options."
+    },
+    "tags": [
+      "hiei",
+      "hand_destruction",
+      "starvation",
+      "disruption"
+    ]
+  },
+  {
+    "id": "CMB-LOCK-02",
+    "name": "Buzz Attack Cost Choke",
+    "archetype": "Resource Denial",
+    "primaryCard": "Chu, the Team Captain",
+    "partnerCards": [
+      "Allure",
+      "Stand Off",
+      "Kidnapping"
+    ],
+    "rating": {
+      "overallScore": 89,
+      "tier": "A-Tier",
+      "lethality": 72,
+      "consistency": 90,
+      "efficiency": 90,
+      "disruption": 96
+    },
+    "synergyType": "cost_increase_tax",
+    "damagePotential": "Forces Opponent to Pay Double Attack Cost",
+    "tacticalExplanation": "Chu's Buzz Attack forces opponent attacks to gain +1 Attack Cost. A standard 1-cost attack now requires 2 card discards; 2-cost attacks require 3 cards. If paired with Allure, the opponent is compelled to attack but cannot afford the inflated discard tax, triggering Allure's 4-card draw!",
+    "tacticalPlaybook": {
+      "setup": "Chu in Arena with Team Rokuyukai bonus.",
+      "execution": "Use Buzz Attack to apply +1 Attack Cost tax on opponent's next turn. Cast Allure.",
+      "payoff": "Opponent cannot afford the inflated attack costs and forfeits attack, netting you 4 cards."
+    },
+    "tags": [
+      "chu",
+      "buzz_attack",
+      "tax",
+      "cost_increase",
+      "resource_denial"
+    ]
+  },
+  {
+    "id": "CMB-LOCK-03",
+    "name": "Kidnapping Top-Deck Freeze",
+    "archetype": "Draw Lockout",
+    "primaryCard": "Kidnapping",
+    "partnerCards": [
+      "Elder Toguro",
+      "Deadly Attack"
+    ],
+    "rating": {
+      "overallScore": 85,
+      "tier": "B-Tier",
+      "lethality": 65,
+      "consistency": 88,
+      "efficiency": 92,
+      "disruption": 94
+    },
+    "synergyType": "draw_lockout",
+    "damagePotential": "Forces Opponent to Draw Dead Cards",
+    "tacticalExplanation": "Kidnapping (0 SE) takes 2 dead cards from your opponent's Discard Pile and places them on TOP of their deck. Pair with Elder Toguro's Sinister Scheme (ordering their top 4 cards) to guarantee your opponent draws unusable cards for 2 consecutive turns.",
+    "tacticalPlaybook": {
+      "setup": "Inspect opponent's discard pile for situational or dead cards.",
+      "execution": "Cast Kidnapping (0 SE), placing 2 dead cards on top of their deck.",
+      "payoff": "Freezes opponent's draw step for 2 turns, denying them answers while you press lethal damage."
+    },
+    "tags": [
+      "kidnapping",
+      "elder_toguro",
+      "top_deck_lock",
+      "stall"
+    ]
+  }
+]

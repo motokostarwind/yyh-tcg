@@ -10,6 +10,7 @@ if (typeof importScripts === 'function') {
     importScripts('../math/hypergeometric.js');
     importScripts('../math/combat_breakpoints.js');
     importScripts('../math/se_simulator.js');
+    importScripts('../math/matchup_simulator.js');
     importScripts('matchup_evaluator.js');
   } catch (e) {
     console.warn('Worker importScripts fallback to bundled functions');
@@ -287,7 +288,7 @@ function generateCardRecommendations(deckState, cardMap, allCards, gaps, activeT
 /**
  * Main Calculation Controller
  */
-function processSynergyEngine(deckState, allCards) {
+function processSynergyEngine(deckState, allCards, combosCatalog = []) {
   const cardMap = new Map();
   allCards.forEach(c => cardMap.set(c.id, c));
 
@@ -323,6 +324,16 @@ function processSynergyEngine(deckState, allCards) {
     anti_meta_tech: calculateDrawTimeline(totalDeckCards, countRoleCards(deckState, cardMap, 'anti_meta_tech'))
   };
 
+  // 8. Monte Carlo Deck Matchup Simulation & Synergy Discovery (1,000 matches)
+  let matchupSimulation = null;
+  if (typeof simulateDeckMatchups === 'function') {
+    try {
+      matchupSimulation = simulateDeckMatchups(deckState, cardMap, combosCatalog || [], 250);
+    } catch (simErr) {
+      console.warn('Matchup simulation error:', simErr);
+    }
+  }
+
   return {
     seViability,
     combatBreakpoints,
@@ -330,7 +341,8 @@ function processSynergyEngine(deckState, allCards) {
     archetype,
     roleGaps,
     recommendations,
-    drawTimelines
+    drawTimelines,
+    matchupSimulation
   };
 }
 
@@ -351,9 +363,9 @@ const isDedicatedWorker = (typeof WorkerGlobalScope !== 'undefined' && self inst
                           (typeof importScripts === 'function' && typeof window === 'undefined');
 if (isDedicatedWorker && typeof self.postMessage === 'function') {
   self.onmessage = function(e) {
-    const { deckState, allCards } = e.data;
+    const { deckState, allCards, combosCatalog } = e.data;
     try {
-      const results = processSynergyEngine(deckState, allCards);
+      const results = processSynergyEngine(deckState, allCards, combosCatalog);
       self.postMessage({ success: true, results });
     } catch (err) {
       self.postMessage({ success: false, error: err.message });

@@ -6,6 +6,7 @@
 // Global State
 const state = {
   cards: [],
+  combos: [],
   filteredCards: [],
   cardMap: new Map(),
   activeTab: 'catalog',
@@ -86,10 +87,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 // 1. Data Fetching
 async function loadCards() {
   try {
-    const res = await fetch('cards.json');
-    if (!res.ok) throw new Error('Failed to load cards.json');
-    state.cards = await res.json();
+    const [resCards, resCombos] = await Promise.all([
+      fetch('cards.json'),
+      fetch('combos.json').catch(() => null)
+    ]);
+
+    if (!resCards.ok) throw new Error('Failed to load cards.json');
+    state.cards = await resCards.json();
     
+    if (resCombos && resCombos.ok) {
+      state.combos = await resCombos.json();
+    } else {
+      state.combos = [];
+    }
+
     // Map cards by ID for instant lookup
     state.cards.forEach(card => {
       state.cardMap.set(card.id, card);
@@ -697,9 +708,23 @@ function openCardModal(card) {
       card.comboLines.forEach(combo => {
         const box = document.createElement('div');
         box.className = 'combo-recipe-box';
+        const tier = combo.rating?.tier;
+        const tierClass = tier ? tier.toLowerCase().replace('-', '') : '';
+
+        const playbookHtml = combo.tacticalPlaybook && combo.tacticalPlaybook.setup ? `
+          <div class="combo-playbook-box">
+            <div class="playbook-step"><span class="step-label">1. Setup:</span> <span>${combo.tacticalPlaybook.setup}</span></div>
+            <div class="playbook-step"><span class="step-label">2. Action:</span> <span>${combo.tacticalPlaybook.execution}</span></div>
+            <div class="playbook-step"><span class="step-label">3. Payoff:</span> <span>${combo.tacticalPlaybook.payoff}</span></div>
+          </div>
+        ` : '';
+
         box.innerHTML = `
           <div class="combo-recipe-header">
-            <span class="combo-recipe-title">${combo.comboName}</span>
+            <div class="combo-title-group">
+              ${tier ? `<span class="badge badge-tier ${tierClass}">${tier} • ${combo.rating.overallScore || 85}</span>` : ''}
+              <span class="combo-recipe-title">${combo.comboName}</span>
+            </div>
             <span class="combo-dmg-badge">${combo.damagePotential || 'Tactical Synergy'}</span>
           </div>
           <div class="partner-tags-row">
@@ -714,6 +739,7 @@ function openCardModal(card) {
               </span>
             `).join('')}
           </div>
+          ${playbookHtml}
           <p class="combo-explanation">${combo.tacticalExplanation || combo.explanation || ''}</p>
         `;
 
@@ -862,12 +888,27 @@ function inspectCardCombos(card) {
         }).join('');
       }
 
+      const tier = combo.rating?.tier;
+      const tierClass = tier ? tier.toLowerCase().replace('-', '') : '';
+
+      const playbookHtml = combo.tacticalPlaybook && combo.tacticalPlaybook.setup ? `
+        <div class="combo-playbook-box">
+          <div class="playbook-step"><span class="step-label">1. Setup:</span> <span>${combo.tacticalPlaybook.setup}</span></div>
+          <div class="playbook-step"><span class="step-label">2. Action:</span> <span>${combo.tacticalPlaybook.execution}</span></div>
+          <div class="playbook-step"><span class="step-label">3. Payoff:</span> <span>${combo.tacticalPlaybook.payoff}</span></div>
+        </div>
+      ` : '';
+
       box.innerHTML = `
         <div class="inspector-combo-head">
-          <span class="inspector-combo-name">${combo.comboName}</span>
+          <div class="combo-title-group">
+            ${tier ? `<span class="badge badge-tier ${tierClass}">${tier} • ${combo.rating.overallScore || 85}</span>` : ''}
+            <span class="inspector-combo-name">${combo.comboName}</span>
+          </div>
           <span class="combo-dmg-badge">${combo.damagePotential || 'Synergy'}</span>
         </div>
         ${partnerChipsHtml ? `<div class="inspector-partner-chips"><span class="partner-label">Partners:</span> ${partnerChipsHtml}</div>` : ''}
+        ${playbookHtml}
         <p class="inspector-combo-desc">${combo.tacticalExplanation || combo.explanation || ''}</p>
       `;
 
@@ -1587,11 +1628,12 @@ function runSynergyCalculation() {
   if (synergyWorker) {
     synergyWorker.postMessage({
       deckState: deckPayload,
-      allCards: state.cards
+      allCards: state.cards,
+      combosCatalog: state.combos || []
     });
   } else if (typeof processSynergyEngine === 'function') {
     try {
-      const results = processSynergyEngine(deckPayload, state.cards);
+      const results = processSynergyEngine(deckPayload, state.cards, state.combos || []);
       renderSynergyAnalytics(results);
     } catch (err) {
       console.error('Direct synergy evaluation error:', err);
@@ -1606,6 +1648,9 @@ function renderSynergyAnalytics(results) {
   renderCombatBreakpoints(results.combatBreakpoints);
   renderTeamMatchups(results.teamMatchups);
   renderRoleGapsAndRecommendations(results.roleGaps, results.recommendations);
+  if (results.matchupSimulation) {
+    renderMatchupSimulation(results.matchupSimulation);
+  }
 }
 
 function renderDeckArchetype(archetype) {
@@ -1817,8 +1862,166 @@ function renderRoleGapsAndRecommendations(roleGaps, recommendations) {
   });
 }
 
+function renderMatchupSimulation(sim) {
+  if (!sim) return;
+  const winRateEl = document.getElementById('simGauntletWinRate');
+  const synergyScoreEl = document.getElementById('simDeckSynergyScore');
+  const activeCountEl = document.getElementById('simActiveCombosCount');
+  const gridEl = document.getElementById('simMatchupsGrid');
+  const pairingsEl = document.getElementById('simPairingsList');
+  const combosEl = document.getElementById('simCombosList');
+
+  if (winRateEl) {
+    winRateEl.textContent = `${sim.overallWinRatePct ?? 0}%`;
+    winRateEl.className = 'sim-pill-val';
+    if (sim.overallWinRatePct >= 60) winRateEl.classList.add('val-favorable');
+    else if (sim.overallWinRatePct < 45) winRateEl.classList.add('val-unfavorable');
+    else winRateEl.classList.add('val-balanced');
+  }
+
+  if (synergyScoreEl) {
+    synergyScoreEl.textContent = `${sim.synergyScore ?? 50} / 100`;
+    synergyScoreEl.className = 'sim-pill-val';
+    if (sim.synergyScore >= 80) synergyScoreEl.classList.add('val-favorable');
+    else if (sim.synergyScore < 50) synergyScoreEl.classList.add('val-unfavorable');
+    else synergyScoreEl.classList.add('val-balanced');
+  }
+
+  if (activeCountEl) {
+    const count = (sim.rankedCombos || []).length;
+    activeCountEl.textContent = `${count} Active`;
+  }
+
+  // Render 4 Gauntlet Decks
+  if (gridEl && sim.matchups) {
+    gridEl.innerHTML = '';
+    sim.matchups.forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'sim-matchup-card';
+      const isFav = m.winRatePct >= 60;
+      const isUnfav = m.winRatePct < 45;
+      const statusClass = isFav ? 'fav' : (isUnfav ? 'unfav' : 'even');
+      const barColor = isFav ? 'var(--spirit-cyan)' : (isUnfav ? '#ef4444' : '#f59e0b');
+
+      card.innerHTML = `
+        <div class="sim-matchup-head">
+          <span class="sim-matchup-name">${m.icon || '⚔️'} ${m.opponentName}</span>
+          <span class="sim-matchup-winrate ${statusClass}">${m.winRatePct}% Win</span>
+        </div>
+        <div class="sim-matchup-bar-track">
+          <div class="sim-matchup-bar-fill" style="width: ${m.winRatePct}%; background: ${barColor};"></div>
+        </div>
+        <div class="sim-matchup-meta">
+          <span>${m.playerWins}W / ${m.opponentWins}L (${m.runs} runs)</span>
+          <span>Avg ${m.avgTurns} turns</span>
+        </div>
+      `;
+      gridEl.appendChild(card);
+    });
+  }
+
+  // Render Top Pairings (Strongest Together)
+  if (pairingsEl) {
+    pairingsEl.innerHTML = '';
+    if (!sim.rankedPairings || sim.rankedPairings.length === 0) {
+      pairingsEl.innerHTML = '<div class="sim-empty-msg">Add more cards to your deck to discover synergistic pairings!</div>';
+    } else {
+      sim.rankedPairings.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'sim-pairing-item';
+        const liftPositive = p.liftDelta >= 0;
+
+        item.innerHTML = `
+          <div class="sim-pairing-cards">
+            <span class="sim-pairing-name" data-card="${p.cardA}">${p.cardA}</span>
+            <span class="sim-pairing-plus">➕</span>
+            <span class="sim-pairing-name" data-card="${p.cardB}">${p.cardB}</span>
+          </div>
+          <div class="sim-pairing-stats">
+            <span class="sim-pairing-winrate">${p.winRate}% Win Rate</span>
+            <span class="sim-pairing-lift ${liftPositive ? 'lift-pos' : 'lift-neg'}">
+              ${liftPositive ? '+' : ''}${p.liftDelta}% Lift
+            </span>
+            <span class="sim-pairing-runs">(${p.gamesTogether} matches)</span>
+          </div>
+        `;
+
+        item.querySelectorAll('.sim-pairing-name').forEach(el => {
+          el.onclick = (e) => {
+            e.stopPropagation();
+            const cName = el.dataset.card;
+            const cCard = findCardByName(cName);
+            if (cCard) openCardModal(cCard);
+          };
+        });
+
+        pairingsEl.appendChild(item);
+      });
+    }
+  }
+
+  // Render Key Combos Executed
+  if (combosEl) {
+    combosEl.innerHTML = '';
+    if (!sim.rankedCombos || sim.rankedCombos.length === 0) {
+      combosEl.innerHTML = '<div class="sim-empty-msg">No active combo lines assembled yet. Check recommendations to add combo partners!</div>';
+    } else {
+      sim.rankedCombos.forEach(c => {
+        const item = document.createElement('div');
+        item.className = 'sim-combo-item';
+        const tier = c.tier || 'A-Tier';
+        const tierClass = tier.toLowerCase().replace('-', '');
+
+        item.innerHTML = `
+          <div class="sim-combo-top">
+            <div class="sim-combo-title-group">
+              <span class="badge badge-tier ${tierClass}">${tier} • ${c.rating}</span>
+              <strong class="sim-combo-name">${c.name}</strong>
+              <span class="sim-combo-archetype">${c.archetype || ''}</span>
+            </div>
+            <div class="sim-combo-rates">
+              <span class="sim-exec-rate" title="Execution frequency">Executed: ${c.execRatePct}%</span>
+              <span class="sim-win-rate" title="Win rate when combo goes off">Win Rate: ${c.winRateWhenExecuted}%</span>
+            </div>
+          </div>
+          <div class="sim-combo-partners-row">
+            <span class="sim-partner-lead">Key Cards:</span>
+            <span class="sim-partner-pill" data-card="${c.primaryCard}">👁️ ${c.primaryCard}</span>
+            ${(c.partnerCards || []).map(p => `<span class="sim-partner-pill" data-card="${p}">👁️ ${p}</span>`).join('')}
+          </div>
+        `;
+
+        item.querySelectorAll('.sim-partner-pill').forEach(pill => {
+          pill.onclick = (e) => {
+            e.stopPropagation();
+            const cName = pill.dataset.card;
+            const cCard = findCardByName(cName);
+            if (cCard) openCardModal(cCard);
+          };
+        });
+
+        combosEl.appendChild(item);
+      });
+    }
+  }
+}
+
 // 9. Deck Saving & Library Integration
 function setupDeckActions() {
+  const btnRunSim = document.getElementById('btnRunSimulation');
+  if (btnRunSim) {
+    btnRunSim.addEventListener('click', () => {
+      btnRunSim.disabled = true;
+      btnRunSim.textContent = '⏳ Simulating 1,000 Matches...';
+      runSynergyCalculation();
+      setTimeout(() => {
+        btnRunSim.disabled = false;
+        btnRunSim.textContent = '⚔️ Run 1,000 Matches';
+        showToast('Monte Carlo matchup simulations complete! Check results below.');
+      }, 500);
+    });
+  }
+
   document.getElementById('deckNameInput').addEventListener('input', (e) => {
     state.currentDeck.name = e.target.value;
     saveCurrentDeckToLocalStorage();

@@ -3210,3 +3210,387 @@ body {
     margin-bottom: 0;
   }
 }
+
+/* ==========================================================================
+   Tactical Combo Tiers & Playbook Styles
+   ========================================================================== */
+.combo-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.badge-tier {
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 2px 7px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.badge-tier.stier {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.35));
+  border: 1px solid #f59e0b;
+  color: #fbbf24;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+}
+
+.badge-tier.atier {
+  background: linear-gradient(135deg, rgba(0, 242, 254, 0.2), rgba(14, 165, 233, 0.3));
+  border: 1px solid var(--spirit-cyan);
+  color: #38bdf8;
+}
+
+.badge-tier.btier {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.3));
+  border: 1px solid #10b981;
+  color: #34d399;
+}
+
+.combo-playbook-box {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid var(--spirit-cyan);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  margin-top: 4px;
+}
+
+.playbook-step {
+  font-size: 0.74rem;
+  color: #cbd5e1;
+  line-height: 1.35;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.playbook-step .step-label {
+  font-weight: 800;
+  color: var(--spirit-cyan);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Monte Carlo Matchup Simulator & Synergy Discovery Panel
+   ========================================================================== */
+.simulator-card {
+  border: 1px solid rgba(0, 242, 254, 0.25) !important;
+  background: linear-gradient(180deg, rgba(13, 22, 41, 0.85) 0%, rgba(9, 14, 26, 0.95) 100%) !important;
+}
+
+.sim-overall-score-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+
+.sim-metric-pill {
+  flex: 1;
+  min-width: 110px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.sim-pill-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+}
+
+.sim-pill-val {
+  font-size: 1.15rem;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: #fff;
+}
+
+.sim-matchups-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.sim-matchup-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sim-matchup-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.sim-matchup-icon {
+  margin-right: 4px;
+}
+
+.sim-matchup-name {
+  color: #e2e8f0;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sim-matchup-winrate {
+  font-weight: 800;
+  padding: 1px 6px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+}
+
+.sim-matchup-winrate.fav {
+  background: rgba(0, 242, 254, 0.15);
+  color: var(--spirit-cyan);
+}
+
+.sim-matchup-winrate.even {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.sim-matchup-winrate.unfav {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.sim-matchup-bar-track {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.sim-matchup-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.sim-matchup-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.sim-section-block {
+  margin-top: 14px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 12px;
+}
+
+.sim-section-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 8px;
+}
+
+.sim-section-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.sim-section-hint {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.sim-pairings-list,
+.sim-combos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sim-pairing-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 0.78rem;
+  transition: all 0.2s ease;
+}
+
+.sim-pairing-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(0, 242, 254, 0.3);
+}
+
+.sim-pairing-cards {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.sim-pairing-name {
+  color: #fff;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba(0, 242, 254, 0.4);
+}
+
+.sim-pairing-name:hover {
+  color: var(--spirit-cyan);
+}
+
+.sim-pairing-plus {
+  color: var(--text-dim);
+  font-size: 0.7rem;
+}
+
+.sim-pairing-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sim-pairing-winrate {
+  font-weight: 700;
+  color: #e2e8f0;
+}
+
+.sim-pairing-lift {
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.sim-pairing-lift.lift-pos {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+.sim-pairing-lift.lift-neg {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+.sim-pairing-runs {
+  font-size: 0.65rem;
+  color: var(--text-dim);
+}
+
+.sim-combo-item {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sim-combo-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sim-combo-title-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sim-combo-name {
+  font-size: 0.82rem;
+  color: #fff;
+}
+
+.sim-combo-archetype {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.sim-combo-rates {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.72rem;
+}
+
+.sim-exec-rate {
+  color: var(--text-dim);
+}
+
+.sim-win-rate {
+  font-weight: 800;
+  color: var(--spirit-cyan);
+}
+
+.sim-combo-partners-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.sim-partner-lead {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.sim-partner-pill {
+  font-size: 0.7rem;
+  background: rgba(0, 242, 254, 0.08);
+  border: 1px solid rgba(0, 242, 254, 0.25);
+  color: var(--spirit-cyan);
+  padding: 1px 7px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.sim-partner-pill:hover {
+  background: rgba(0, 242, 254, 0.2);
+  border-color: var(--spirit-cyan);
+  color: #fff;
+}
+
+.sim-empty-msg {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+  font-style: italic;
+  padding: 8px 0;
+}
+
