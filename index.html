@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yu Yu Hakusho TCG - Database & Deck Builder</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800;900&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="theme-dark">
+  <div id="app">
+    <!-- Main Top Navigation -->
+    <header class="app-header">
+      <div class="header-left">
+        <div class="logo-group">
+          <span class="spirit-flame-icon">🔥</span>
+          <div class="title-container">
+            <h1 class="app-title">YU YU HAKUSHO <span class="tcg-tag">TCG</span></h1>
+            <p class="app-subtitle">2003 Score Entertainment • Database & Deck Builder</p>
+          </div>
+        </div>
+        <div class="set-badges">
+          <span class="set-badge badge-gf">Ghost Files <span>(211)</span></span>
+          <span class="set-badge badge-dt">Dark Tournament <span>(160)</span></span>
+          <span class="set-badge badge-gw">Gateway <span>(162)</span></span>
+        </div>
+      </div>
+
+      <div class="header-center nav-tabs">
+        <button class="nav-tab active" data-tab="catalog">Card Database</button>
+        <button class="nav-tab" data-tab="deckbuilder">
+          Deck Builder 
+          <span class="deck-count-pill" id="headerDeckCount">0/44</span>
+        </button>
+        <button class="nav-tab" data-tab="saved-decks">Saved Decks</button>
+      </div>
+
+      <div class="header-right header-actions">
+        <button class="btn btn-secondary btn-sm" id="btnNewDeck" title="Start a fresh deck">New Deck</button>
+        <button class="btn btn-secondary btn-sm" id="btnImportDeck" title="Import from text or JSON">Import</button>
+        <button class="btn btn-primary btn-sm" id="btnExportDeck" title="Export or copy decklist">Export</button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="main-layout">
+
+      <!-- ================= TAB 1: CARD DATABASE ================= -->
+      <section id="tab-catalog" class="tab-pane active">
+        <!-- Filter Controls -->
+        <div class="filter-panel">
+          <div class="search-row">
+            <div class="search-input-wrapper">
+              <span class="search-icon">🔍</span>
+              <input type="text" id="searchInput" placeholder="Search by card name, rules text, attacks, or code..." autocomplete="off">
+              <button id="clearSearchBtn" class="clear-btn" title="Clear search">✕</button>
+            </div>
+            <div class="quick-stats">
+              <span id="filteredCount">533</span> cards found
+            </div>
+            <div class="view-toggle">
+              <button class="view-btn active" id="viewGridBtn" title="Grid View">Grid</button>
+              <button class="view-btn" id="viewTableBtn" title="Table View">Table</button>
+            </div>
+          </div>
+
+          <div class="filters-grid">
+            <!-- Set Filter -->
+            <div class="filter-group">
+              <label for="filterSet">Set</label>
+              <select id="filterSet">
+                <option value="all">All Sets</option>
+                <option value="Ghost Files">Ghost Files</option>
+                <option value="Dark Tournament">Dark Tournament</option>
+                <option value="Gateway">Gateway</option>
+              </select>
+            </div>
+
+            <!-- Card Type Filter -->
+            <div class="filter-group">
+              <label for="filterType">Card Type</label>
+              <select id="filterType">
+                <option value="all">All Types</option>
+                <option value="Character">Character</option>
+                <option value="Technique">Technique</option>
+                <option value="Item">Item</option>
+                <option value="Event">Event</option>
+              </select>
+            </div>
+
+            <!-- Alignment Filter -->
+            <div class="filter-group">
+              <label for="filterAlignment">Alignment</label>
+              <select id="filterAlignment">
+                <option value="all">All Alignments</option>
+                <option value="Hero">Hero</option>
+                <option value="Villain">Villain</option>
+                <option value="Hero / Villain">Hero / Villain</option>
+                <option value="Neutral">Neutral</option>
+                <option value="Leader">Team Leader</option>
+              </select>
+            </div>
+
+            <!-- Team Filter -->
+            <div class="filter-group">
+              <label for="filterTeam">Team Symbol</label>
+              <select id="filterTeam">
+                <option value="all">All Teams</option>
+                <option value="Team Urameshi">Team Urameshi</option>
+                <option value="Team Toguro">Team Toguro</option>
+                <option value="Team Masho">Team Masho</option>
+                <option value="Team Saint Beasts">Team Saint Beasts</option>
+                <option value="Team Rokuyukai">Team Rokuyukai</option>
+                <option value="Team Uraotogi">Team Uraotogi</option>
+                <option value="Team Genkai">Team Genkai</option>
+                <option value="Team Koenma">Team Koenma</option>
+                <option value="Team Sensui">Team Sensui</option>
+                <option value="Team Ronin">Team Ronin</option>
+                <option value="Team Ichigaki">Team Ichigaki</option>
+                <option value="Team Sarayashki">Team Sarayashki</option>
+                <option value="Team Raizen">Team Raizen</option>
+              </select>
+            </div>
+
+            <!-- Sort By -->
+            <div class="filter-group">
+              <label for="sortBy">Sort By</label>
+              <select id="sortBy">
+                <option value="name-asc">Name (A-Z)</option>
+                <option value="name-desc">Name (Z-A)</option>
+                <option value="set-code">Set & Number</option>
+                <option value="defense-desc">Defense (High to Low)</option>
+                <option value="se-asc">Spirit Energy (Low to High)</option>
+                <option value="power-desc">Max Attack Value</option>
+              </select>
+            </div>
+
+            <!-- Errata / Rulings Filter -->
+            <div class="filter-group">
+              <label for="filterErrata">⚖️ Rulings / Errata</label>
+              <select id="filterErrata">
+                <option value="all">All Cards</option>
+                <option value="errata">With Errata / Rulings (114)</option>
+                <option value="standard">Standard Printings Only</option>
+              </select>
+            </div>
+
+            <!-- Strategic Role Filter -->
+            <div class="filter-group">
+              <label for="filterStrategicRole">🎯 Strategic Role</label>
+              <select id="filterStrategicRole">
+                <option value="all">All Strategic Roles</option>
+                <option value="atk_pump">⚔️ Combat Pump (+ATK)</option>
+                <option value="def_buff">🛡️ Defense Buff (+DEF)</option>
+                <option value="card_draw">🃏 Card Draw / Advantage</option>
+                <option value="se_battery">⚡ Spirit Energy Battery (+SE)</option>
+                <option value="deck_mill">🌀 Deck Mill & Discard</option>
+                <option value="anti_meta_tech">🚫 Anti-Meta Tech & Lock</option>
+                <option value="damage_finisher">💥 Finisher (2+ Damage)</option>
+                <option value="setup_accelerant">🏁 Setup Accelerant</option>
+              </select>
+            </div>
+
+            <div class="filter-group filter-actions-group">
+              <label>&nbsp;</label>
+              <button class="btn btn-secondary btn-full" id="btnResetFilters">Reset Filters</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Dedicated Card Combo & Synergy Inspector Panel -->
+        <div id="cardComboInspector" class="combo-inspector-panel" style="display: none;">
+          <div class="inspector-header">
+            <div class="inspector-card-preview">
+              <img id="inspectorThumb" class="inspector-thumb" src="" alt="Selected Card">
+              <div class="inspector-meta">
+                <div class="inspector-badge-row">
+                  <span class="badge" id="inspectorTypeBadge">Card Type</span>
+                  <span class="badge badge-combo-count" id="inspectorComboBadge">💥 Combos</span>
+                  <span class="badge badge-deck-synergy" id="inspectorDeckBadge">Deck Synergies</span>
+                </div>
+                <h3 id="inspectorCardName" class="inspector-title">Card Name</h3>
+                <span id="inspectorCardSub" class="inspector-sub">Set • DEF/SE</span>
+              </div>
+            </div>
+            <div class="inspector-header-actions">
+              <button id="inspectorBtnAddDeck" class="btn btn-primary btn-sm">+ Add to Deck</button>
+              <button id="inspectorCloseBtn" class="inspector-close-btn" title="Close inspector">✕</button>
+            </div>
+          </div>
+          <div class="inspector-body">
+            <div class="inspector-sections-grid">
+              <div class="inspector-section">
+                <h4>💥 Devastating Combos & Key Partner Cards</h4>
+                <div id="inspectorCombosList" class="inspector-combos-list">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+              <div class="inspector-section">
+                <h4>🤝 Synergies with Your Active Deck</h4>
+                <div id="inspectorDeckSynergiesList" class="inspector-deck-synergies-list">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cards Display Area -->
+        <div id="cardsGrid" class="cards-grid">
+          <!-- Rendered dynamically -->
+        </div>
+
+        <div id="cardsTable" class="cards-table-container" style="display: none;">
+          <table class="cards-table">
+            <thead>
+              <tr>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Set / No.</th>
+                <th>Type</th>
+                <th>Team</th>
+                <th>DEF</th>
+                <th>SE</th>
+                <th>Attacks / Abilities</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="cardsTableBody">
+              <!-- Rendered dynamically -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: DECK BUILDER ================= -->
+      <section id="tab-deckbuilder" class="tab-pane">
+        <div class="deckbuilder-container">
+          
+          <!-- Deck Summary Top Bar -->
+          <div class="deck-top-bar">
+            <div class="deck-meta-inputs">
+              <input type="text" id="deckNameInput" class="deck-name-input" value="Untitled Deck" placeholder="Deck Name...">
+              <input type="text" id="deckAuthorInput" class="deck-author-input" placeholder="Author (optional)">
+            </div>
+            
+            <div class="deck-status-counters">
+              <div class="counter-box" id="charCounterBox">
+                <span class="counter-label">Starting Characters</span>
+                <span class="counter-value" id="charCountDisplay">0 / 4</span>
+              </div>
+              <div class="counter-box" id="mainCounterBox">
+                <span class="counter-label">Main Deck</span>
+                <span class="counter-value" id="mainCountDisplay">0 / 40 min</span>
+              </div>
+              <div class="counter-box" id="totalCounterBox">
+                <span class="counter-label">Total Deck</span>
+                <span class="counter-value" id="totalCountDisplay">0 / 44 min</span>
+              </div>
+              <div class="validation-badge-wrapper">
+                <span id="deckLegalBadge" class="deck-badge badge-warning">Incomplete Deck</span>
+              </div>
+            </div>
+
+            <div class="deck-bar-actions">
+              <button class="btn btn-primary" id="btnSaveDeck">Save Deck</button>
+              <button class="btn btn-secondary" id="btnClearDeck">Clear Deck</button>
+            </div>
+          </div>
+
+          <!-- Active Team Bonus Banner -->
+          <div id="teamBonusBanner" class="team-bonus-banner inactive">
+            <div class="team-bonus-icon">⚡</div>
+            <div class="team-bonus-content">
+              <div class="team-bonus-title" id="teamBonusTitle">Team Bonus Inactive</div>
+              <div class="team-bonus-desc" id="teamBonusDesc">Include 4 starting characters with the same Team Symbol to unlock that team's special game bonus!</div>
+            </div>
+          </div>
+
+          <!-- Starting Characters Row (Match Slots 1 to 4) -->
+          <div class="starting-characters-section">
+            <div class="section-title-bar">
+              <h3>Starting Characters (Match Slots 1–4)</h3>
+              <span class="section-hint">Click a slot to choose or replace a character. Each character must be distinct.</span>
+            </div>
+
+            <div class="match-slots-grid">
+              <!-- Slot 1 -->
+              <div class="match-slot-card" data-slot="1">
+                <div class="slot-header">
+                  <span class="slot-num">Match Slot 1</span>
+                  <button class="slot-leader-btn" data-slot="1" title="Toggle as Team Leader">👑 Leader</button>
+                </div>
+                <div class="slot-dropzone" id="slotZone1">
+                  <div class="slot-empty-state">
+                    <span class="empty-icon">➕</span>
+                    <p>Assign Character</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slot 2 -->
+              <div class="match-slot-card" data-slot="2">
+                <div class="slot-header">
+                  <span class="slot-num">Match Slot 2</span>
+                  <button class="slot-leader-btn" data-slot="2" title="Toggle as Team Leader">👑 Leader</button>
+                </div>
+                <div class="slot-dropzone" id="slotZone2">
+                  <div class="slot-empty-state">
+                    <span class="empty-icon">➕</span>
+                    <p>Assign Character</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slot 3 -->
+              <div class="match-slot-card" data-slot="3">
+                <div class="slot-header">
+                  <span class="slot-num">Match Slot 3</span>
+                  <button class="slot-leader-btn" data-slot="3" title="Toggle as Team Leader">👑 Leader</button>
+                </div>
+                <div class="slot-dropzone" id="slotZone3">
+                  <div class="slot-empty-state">
+                    <span class="empty-icon">➕</span>
+                    <p>Assign Character</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Slot 4 -->
+              <div class="match-slot-card" data-slot="4">
+                <div class="slot-header">
+                  <span class="slot-num">Match Slot 4</span>
+                  <button class="slot-leader-btn" data-slot="4" title="Toggle as Team Leader">👑 Leader</button>
+                </div>
+                <div class="slot-dropzone" id="slotZone4">
+                  <div class="slot-empty-state">
+                    <span class="empty-icon">➕</span>
+                    <p>Assign Character</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Main Deck Sections & Analytics Two-Column -->
+          <div class="deck-body-layout">
+            
+            <!-- Left Column: Main Deck List Grouped by Type -->
+            <div class="deck-cards-list-col">
+              <div class="deck-type-group" id="deckGroupTechniques">
+                <div class="type-header">
+                  <span class="type-title">Techniques <span class="type-count" id="countTechs">(0)</span></span>
+                </div>
+                <div class="type-items" id="itemsTechs">
+                  <div class="empty-type-msg">No techniques added yet.</div>
+                </div>
+              </div>
+
+              <div class="deck-type-group" id="deckGroupEvents">
+                <div class="type-header">
+                  <span class="type-title">Events <span class="type-count" id="countEvents">(0)</span></span>
+                </div>
+                <div class="type-items" id="itemsEvents">
+                  <div class="empty-type-msg">No events added yet.</div>
+                </div>
+              </div>
+
+              <div class="deck-type-group" id="deckGroupItems">
+                <div class="type-header">
+                  <span class="type-title">Items <span class="type-count" id="countItems">(0)</span></span>
+                </div>
+                <div class="type-items" id="itemsItems">
+                  <div class="empty-type-msg">No items added yet.</div>
+                </div>
+              </div>
+
+              <div class="deck-type-group" id="deckGroupCharacters">
+                <div class="type-header">
+                  <span class="type-title">Main Deck Characters <span class="type-count" id="countChars">(0)</span></span>
+                </div>
+                <div class="type-items" id="itemsChars">
+                  <div class="empty-type-msg">No sideline/reserve characters added.</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column: Deck Analytics & Validation -->
+            <div class="deck-analytics-col">
+              <!-- Validation Checklist Card -->
+              <div class="analytics-card">
+                <h4>Rules Validation Checklist</h4>
+                <ul class="validation-checklist" id="validationList">
+                  <li id="checkStartingChars" class="check-item check-fail">
+                    <span class="check-icon">✕</span> 4 Starting Characters placed
+                  </li>
+                  <li id="checkUniqueChars" class="check-item check-pass">
+                    <span class="check-icon">✓</span> Starting characters are distinct
+                  </li>
+                  <li id="checkMainDeckSize" class="check-item check-fail">
+                    <span class="check-icon">✕</span> Minimum 40 Main Deck cards
+                  </li>
+                  <li id="checkTotalDeckSize" class="check-item check-fail">
+                    <span class="check-icon">✕</span> Minimum 44 Total cards
+                  </li>
+                  <li id="checkCopyLimits" class="check-item check-pass">
+                    <span class="check-icon">✓</span> Copy limits respected (max 3, Limit 1 respected)
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Detected Deck Archetype -->
+              <div class="analytics-card archetype-card" id="deckArchetypeCard">
+                <div class="archetype-badge-header">
+                  <span class="archetype-icon" id="archetypeIcon">⚡</span>
+                  <div>
+                    <span class="archetype-label">Detected Archetype</span>
+                    <h4 id="archetypeName" class="archetype-title">Burst Aggro / Breakpoint KO</h4>
+                  </div>
+                </div>
+                <p class="archetype-desc" id="archetypeDesc">Focuses on high attack values and explosive combat pumps to hit double-damage KO breakpoints.</p>
+              </div>
+
+              <!-- Turn 1-3 Resource & SE Viability -->
+              <div class="analytics-card">
+                <div class="card-header-flex">
+                  <h4>Turn 1–3 Resource Viability</h4>
+                  <span class="badge badge-se-rating" id="seViabilityBadge">Optimal</span>
+                </div>
+                <div class="resource-viability-grid">
+                  <div class="viability-metric">
+                    <span class="v-label">Turn 1 Action</span>
+                    <span class="v-val" id="valT1Action">--%</span>
+                  </div>
+                  <div class="viability-metric">
+                    <span class="v-label">Turn 2 Action</span>
+                    <span class="v-val" id="valT2Action">--%</span>
+                  </div>
+                  <div class="viability-metric">
+                    <span class="v-label">Turn 1 Attack</span>
+                    <span class="v-val" id="valT1Attack">--%</span>
+                  </div>
+                  <div class="viability-metric">
+                    <span class="v-label">Dead Hand Risk</span>
+                    <span class="v-val" id="valDeadHand">--%</span>
+                  </div>
+                </div>
+                <p class="viability-advice" id="resourceViabilityAdvice">Loading resource simulation...</p>
+              </div>
+
+              <!-- Combat Breakpoint KO Radar (vs 5k, 6k, 7k, 8k DEF) -->
+              <div class="analytics-card">
+                <div class="card-header-flex">
+                  <h4>Combat Breakpoint KO Radar</h4>
+                  <span class="header-sub" id="breakpointPrimaryFighter">Primary: --</span>
+                </div>
+                <div class="breakpoint-tiers-list" id="breakpointTiersList">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+              <!-- Team Matchup Power Scale (vs 9 Teams) -->
+              <div class="analytics-card matchup-card">
+                <div class="card-header-flex">
+                  <h4>Team Matchup Power Scale</h4>
+                  <span class="overall-rating-badge" id="overallMetaRating">Meta Rating: --%</span>
+                </div>
+                <div class="universal-tech-banner" id="universalTechBanner">
+                  <span class="banner-icon">💡</span>
+                  <span class="banner-text" id="universalTechText">Analyzing cross-matchup vulnerabilities...</span>
+                </div>
+                <div class="matchup-bars-container" id="matchupBarsContainer">
+                  <!-- 9 team rows with drilldown advice -->
+                </div>
+              </div>
+
+              <!-- Strategic Role Gaps & Smart Recommendations -->
+              <div class="analytics-card recommendations-card" id="deckRecommendationsCard">
+                <div class="card-header-flex">
+                  <h4>Strategic Synergies & Recommendations</h4>
+                  <span class="header-sub">Role Gap Analysis</span>
+                </div>
+                <div class="role-gaps-container" id="roleGapsContainer">
+                  <!-- Gap alert banners -->
+                </div>
+                <div class="recommendations-list" id="recommendationsList">
+                  <!-- Recommended cards -->
+                </div>
+              </div>
+
+              <!-- Spirit Energy Cost Curve -->
+              <div class="analytics-card">
+                <h4>Spirit Energy (SE) Cost Curve</h4>
+                <div class="curve-chart" id="seCurveChart">
+                  <!-- Rendered dynamically -->
+                </div>
+              </div>
+
+              <!-- Deck Composition Breakdown -->
+              <div class="analytics-card">
+                <h4>Deck Composition</h4>
+                <div class="comp-bars" id="compBars">
+                  <div class="comp-row">
+                    <span>Techniques</span>
+                    <div class="comp-bar-bg"><div class="comp-bar-fill fill-tech" id="barTech" style="width: 0%"></div></div>
+                    <span id="labelBarTech">0%</span>
+                  </div>
+                  <div class="comp-row">
+                    <span>Events</span>
+                    <div class="comp-bar-bg"><div class="comp-bar-fill fill-event" id="barEvent" style="width: 0%"></div></div>
+                    <span id="labelBarEvent">0%</span>
+                  </div>
+                  <div class="comp-row">
+                    <span>Items</span>
+                    <div class="comp-bar-bg"><div class="comp-bar-fill fill-item" id="barItem" style="width: 0%"></div></div>
+                    <span id="labelBarItem">0%</span>
+                  </div>
+                  <div class="comp-row">
+                    <span>Characters</span>
+                    <div class="comp-bar-bg"><div class="comp-bar-fill fill-char" id="barChar" style="width: 0%"></div></div>
+                    <span id="labelBarChar">0%</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: SAVED DECKS ================= -->
+      <section id="tab-saved-decks" class="tab-pane">
+        <div class="saved-decks-container">
+          <div class="saved-decks-header">
+            <h2>Saved Deck Library</h2>
+            <p>Access your saved decks, pre-built starters, or import community decks.</p>
+          </div>
+          <div class="saved-decks-grid" id="savedDecksGrid">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ================= CARD DETAIL MODAL ================= -->
+    <div id="cardModal" class="modal-overlay" style="display: none;">
+      <div class="modal-dialog card-modal-dialog">
+        <button class="modal-close-btn" id="cardModalClose">✕</button>
+        <div class="card-modal-content">
+          <!-- Card Image & Variant Selector -->
+          <div class="card-modal-left">
+            <div class="card-image-preview-frame">
+              <img id="modalCardImg" src="" alt="Card Artwork" class="modal-card-image">
+            </div>
+            <div class="variant-selector-wrapper" id="modalVariantSection">
+              <label for="modalVariantSelect">Foil / Artwork Variant:</label>
+              <select id="modalVariantSelect">
+                <!-- Dynamically populated -->
+              </select>
+            </div>
+          </div>
+
+          <!-- Card Stats & Rules Details -->
+          <div class="card-modal-right">
+            <div class="card-modal-head">
+              <h2 id="modalCardName" class="modal-title">Card Name</h2>
+              <div class="modal-badges" id="modalCardBadges">
+                <!-- Badges -->
+              </div>
+            </div>
+
+            <div class="card-stats-banner" id="modalStatsBanner">
+              <!-- DEF / SE -->
+            </div>
+
+            <div class="card-modal-attacks" id="modalAttacksSection">
+              <h3>Attacks & Techniques</h3>
+              <div id="modalAttacksList" class="attacks-list"></div>
+            </div>
+
+            <!-- Special Effects & Non-Attack Abilities Section (Hidden if pure attack card) -->
+            <div class="card-modal-effects" id="modalEffectsSection">
+              <h3 id="modalEffectsTitle">Passives & Special Effects</h3>
+              <div id="modalEffectsBody" class="effects-body"></div>
+            </div>
+
+            <!-- Dedicated Errata & Updated Tournament Rulings Section -->
+            <div class="card-modal-errata" id="modalErrataSection" style="display: none;">
+              <div class="errata-head">
+                <span class="errata-icon">⚖️</span>
+                <div class="errata-title-group">
+                  <h3>Official Errata & Tournament Rulings</h3>
+                  <span class="errata-source" id="modalErrataSource">Score CRD v4.04.05 (April 4, 2005)</span>
+                </div>
+                <span class="errata-date-badge" id="modalErrataDate">Effective Date</span>
+              </div>
+              <div class="errata-body">
+                <div class="errata-box old-box">
+                  <span class="errata-box-label">Original Printed Effect:</span>
+                  <p id="modalErrataOld"></p>
+                </div>
+                <div class="errata-box new-box">
+                  <span class="errata-box-label">Updated Official Ruling / Errata:</span>
+                  <p id="modalErrataNew"></p>
+                </div>
+                <div class="errata-box note-box" id="modalErrataClarifBox" style="display: none;">
+                  <span class="errata-box-label">Tournament Clarification:</span>
+                  <p id="modalErrataClarif"></p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Universal Combo Recipes Section -->
+            <div class="card-modal-combos" id="modalCombosSection" style="display: none;">
+              <div class="combo-head">
+                <span class="combo-icon">💥</span>
+                <div class="combo-title-group">
+                  <h3>Universal Combo Recipes & Synergies</h3>
+                  <span class="combo-sub">Cross-card tactical synergies & lethal combo lines</span>
+                </div>
+              </div>
+              <div id="modalCombosList" class="combos-list"></div>
+            </div>
+
+            <!-- Deck Add Actions inside Modal -->
+            <div class="card-modal-actions">
+              <div class="modal-deck-actions">
+                <button class="btn btn-primary" id="modalBtnAddMain">Add to Main Deck</button>
+                <div class="slot-add-dropdown-wrapper">
+                  <button class="btn btn-secondary dropdown-toggle" id="modalBtnAddSlot">Add to Match Slot ▼</button>
+                  <div class="dropdown-menu" id="modalSlotDropdown">
+                    <button class="dropdown-item" data-slot="1">Match Slot 1</button>
+                    <button class="dropdown-item" data-slot="2">Match Slot 2</button>
+                    <button class="dropdown-item" data-slot="3">Match Slot 3</button>
+                    <button class="dropdown-item" data-slot="4">Match Slot 4</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= IMPORT / EXPORT MODAL ================= -->
+    <div id="exportModal" class="modal-overlay" style="display: none;">
+      <div class="modal-dialog export-modal-dialog">
+        <button class="modal-close-btn" id="exportModalClose">✕</button>
+        <div class="export-modal-content">
+          <h2 id="exportModalTitle">Export Deck</h2>
+          <div class="export-tabs">
+            <button class="export-tab-btn active" data-format="text">Tournament Text</button>
+            <button class="export-tab-btn" data-format="json">JSON Format</button>
+          </div>
+
+          <div class="export-text-area-wrapper">
+            <textarea id="exportTextArea" rows="14" spellcheck="false"></textarea>
+          </div>
+
+          <div class="export-modal-footer">
+            <button class="btn btn-secondary" id="btnCopyExport">Copy to Clipboard</button>
+            <button class="btn btn-primary" id="btnDownloadExport">Download File</button>
+            <button class="btn btn-primary" id="btnApplyImport" style="display: none;">Load Deck</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toastNotification" class="toast-popup" style="display: none;">
+      <span id="toastMessage">Notification</span>
+    </div>
+
+  </div>
+
+  <!-- Core Math & Synergy Engine Modules -->
+  <script src="src/math/hypergeometric.js"></script>
+  <script src="src/math/combat_breakpoints.js"></script>
+  <script src="src/math/se_simulator.js"></script>
+  <script src="src/engine/matchup_evaluator.js"></script>
+  <script src="src/engine/synergy-worker.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

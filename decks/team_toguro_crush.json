@@ -1,0 +1,28 @@
+{
+  "id": "team_toguro_crush",
+  "name": "Team Toguro Heavy Beatdown",
+  "author": "Score Entertainment",
+  "slots": {
+    "1": "GF-ST8",
+    "2": "GF-ST38",
+    "3": "GF-ST40",
+    "4": "GF-ST37"
+  },
+  "leaderSlot": 1,
+  "mainDeck": {
+    "GF-ST101": 3,
+    "GF-C52": 3,
+    "GF-C60": 3,
+    "GF-C75": 3,
+    "GF-C82": 3,
+    "GF-C113": 3,
+    "GF-C117": 3,
+    "GF-ST172": 3,
+    "GF-ST173": 3,
+    "GF-S174": 3,
+    "GF-U175": 3,
+    "GF-U176": 3,
+    "GF-G179": 1,
+    "GF-R126": 3
+  }
+}

@@ -1,0 +1,25 @@
+# Python & Cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+.pytest_cache/
+
+# Development & Scratch Scripts
+scratch/
+.system_generated/
+build_errata.py
+check_search.py
+extract_cards.py
+test_errata_detail.py
+test_splitter.py
+verify_all_features.py
+crd_dump.txt
+
+# Raw Reference PDFs (excluded to keep repo lightweight; web app uses cards.json)
+*.pdf
+
+# OS Metadata
+.DS_Store
+Thumbs.db
+desktop.ini

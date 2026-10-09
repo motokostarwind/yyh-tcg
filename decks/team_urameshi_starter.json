@@ -1,0 +1,28 @@
+{
+  "id": "team_urameshi_starter",
+  "name": "Team Urameshi Starter Deck",
+  "author": "Score Entertainment",
+  "slots": {
+    "1": "GF-R5",
+    "2": "GF-R35",
+    "3": "GF-ST41",
+    "4": "GF-R32"
+  },
+  "leaderSlot": 1,
+  "mainDeck": {
+    "GF-C52": 3,
+    "GF-C53": 3,
+    "GF-C154": 3,
+    "GF-ST134": 3,
+    "GF-C60": 3,
+    "GF-C63": 3,
+    "GF-C75": 3,
+    "GF-C82": 3,
+    "GF-C113": 3,
+    "GF-C117": 3,
+    "GF-ST130": 3,
+    "GF-ST171": 3,
+    "GF-G178": 1,
+    "GF-R126": 3
+  }
+}

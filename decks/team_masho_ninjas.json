@@ -1,0 +1,28 @@
+{
+  "id": "team_masho_ninjas",
+  "name": "Team Masho Shadow Ninjas",
+  "author": "Score Entertainment",
+  "slots": {
+    "1": "GF-C1",
+    "2": "GF-C13",
+    "3": "GF-C30",
+    "4": "GF-R33"
+  },
+  "leaderSlot": 1,
+  "mainDeck": {
+    "GF-C52": 3,
+    "GF-C60": 3,
+    "GF-C75": 3,
+    "GF-C82": 3,
+    "GF-C113": 3,
+    "GF-C117": 3,
+    "GF-ST130": 3,
+    "GF-ST171": 3,
+    "GF-ST172": 3,
+    "GF-ST173": 3,
+    "GF-S174": 3,
+    "GF-U175": 3,
+    "GF-G180": 1,
+    "GF-R126": 3
+  }
+}
