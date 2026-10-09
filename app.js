@@ -482,6 +482,34 @@ function setupModalListeners() {
     const selectedPath = e.target.value;
     document.getElementById('modalCardImg').src = selectedPath;
   });
+
+  // Mobile Modal Tab Switcher (Option A)
+  const modalDialog = document.querySelector('.card-modal-dialog');
+  const tabRulesBtn = document.getElementById('modalTabRulesBtn');
+  const tabArtBtn = document.getElementById('modalTabArtBtn');
+  const btnSwitchRules = document.getElementById('btnMobileSwitchRules');
+  const btnSwitchArt = document.getElementById('btnMobileSwitchArt');
+
+  window.setModalMobileTab = function(tab) {
+    if (!modalDialog) return;
+    modalDialog.setAttribute('data-mobile-view', tab);
+    if (tabRulesBtn && tabArtBtn) {
+      if (tab === 'rules') {
+        tabRulesBtn.classList.add('active');
+        tabArtBtn.classList.remove('active');
+      } else {
+        tabArtBtn.classList.add('active');
+        tabRulesBtn.classList.remove('active');
+      }
+    }
+    const modalContent = document.querySelector('.card-modal-content');
+    if (modalContent) modalContent.scrollTop = 0;
+  };
+
+  if (tabRulesBtn) tabRulesBtn.addEventListener('click', () => window.setModalMobileTab('rules'));
+  if (tabArtBtn) tabArtBtn.addEventListener('click', () => window.setModalMobileTab('art'));
+  if (btnSwitchRules) btnSwitchRules.addEventListener('click', () => window.setModalMobileTab('rules'));
+  if (btnSwitchArt) btnSwitchArt.addEventListener('click', () => window.setModalMobileTab('art'));
 }
 
 function findCardByName(name) {
@@ -504,6 +532,11 @@ function openCardModal(card) {
   const modal = document.getElementById('cardModal');
   const modalContent = modal.querySelector('.card-modal-content');
   if (modalContent) modalContent.scrollTop = 0;
+
+  // On mobile devices, default to rules & attacks view for immediate readability
+  if (window.setModalMobileTab) {
+    window.setModalMobileTab('rules');
+  }
 
   document.getElementById('modalCardName').textContent = card.name;
   document.getElementById('modalCardImg').src = card.images.primary;

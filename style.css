@@ -2086,6 +2086,20 @@ body {
   width: 100%;
 }
 
+/* Mobile switcher elements - hidden on desktop by default */
+.modal-mobile-tabs,
+.btn-mobile-switch-rules,
+.btn-mobile-switch-art {
+  display: none !important;
+}
+
+.modal-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
 .card-modal-content {
   display: grid;
   grid-template-columns: 320px 1fr;
@@ -3021,13 +3035,178 @@ body {
 /* Responsive adjustments */
 @media (max-width: 1024px) {
   .deck-body-layout { grid-template-columns: 1fr; }
-  .match-slots-grid { grid-template-columns: repeat(2, 1fr); }
-  .card-modal-content { grid-template-columns: 1fr; }
-  .card-modal-left { border-right: none; border-bottom: 1px solid var(--border-color); }
+  .match-slots-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
 }
 
 @media (max-width: 768px) {
   .app-header { flex-direction: column; gap: 12px; padding: 12px; }
-  .match-slots-grid { grid-template-columns: 1fr; }
-  .cards-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+  
+  /* 2x2 Grid for Starting Characters on Mobile */
+  .match-slots-grid { 
+    grid-template-columns: repeat(2, 1fr); 
+    gap: 10px; 
+  }
+  .match-slot-card {
+    min-height: 280px;
+    padding: 8px;
+  }
+  .slot-dropzone {
+    min-height: 220px;
+    padding: 4px;
+  }
+  .slot-empty-state {
+    padding: 8px;
+  }
+  .slot-empty-state .empty-icon {
+    font-size: 1.4rem;
+    margin-bottom: 2px;
+  }
+  .slot-empty-state p {
+    font-size: 0.72rem;
+  }
+  .slot-char-img-container {
+    margin-bottom: 4px;
+  }
+  .slot-char-img {
+    max-width: 100%;
+  }
+  .slot-char-name {
+    font-size: 0.76rem;
+  }
+  .slot-char-meta {
+    font-size: 0.68rem;
+    padding: 0 2px;
+  }
+  .slot-remove-btn {
+    padding: 3px;
+    font-size: 0.66rem;
+    margin-top: 4px;
+  }
+
+  .cards-grid { 
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); 
+    gap: 10px; 
+  }
+
+  /* Card Detail Modal - Option A Mobile Segmented Switcher */
+  .card-modal-dialog {
+    max-height: 94vh;
+    margin: 8px;
+    border-radius: var(--radius-md);
+  }
+
+  .modal-mobile-tabs {
+    display: flex !important;
+    background: #090e18;
+    border-bottom: 1px solid var(--border-color);
+    padding: 8px 10px;
+    gap: 8px;
+    position: sticky;
+    top: 0;
+    z-index: 5;
+  }
+
+  .modal-mobile-tab-btn {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .modal-mobile-tab-btn.active {
+    background: var(--spirit-cyan);
+    color: #050a14;
+    border-color: var(--spirit-cyan);
+    box-shadow: 0 0 10px rgba(0, 242, 254, 0.35);
+  }
+
+  .card-modal-content {
+    grid-template-columns: 1fr !important;
+    max-height: calc(94vh - 54px);
+    overflow-y: auto;
+  }
+
+  /* When viewing rules (default on mobile): hide image column, expand rules */
+  .card-modal-dialog[data-mobile-view="rules"] .card-modal-left {
+    display: none !important;
+  }
+  .card-modal-dialog[data-mobile-view="rules"] .card-modal-right {
+    display: flex !important;
+    width: 100%;
+    padding: 16px 14px;
+    gap: 14px;
+  }
+
+  /* When viewing art on mobile: show image column, hide rules */
+  .card-modal-dialog[data-mobile-view="art"] .card-modal-left {
+    display: flex !important;
+    width: 100%;
+    padding: 16px 14px;
+    border-right: none;
+    border-bottom: none;
+    align-items: center;
+    gap: 14px;
+  }
+  .card-modal-dialog[data-mobile-view="art"] .card-modal-right {
+    display: none !important;
+  }
+
+  .card-image-preview-frame {
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .btn-mobile-switch-rules {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: 100%;
+    max-width: 320px;
+    margin-top: 10px;
+    padding: 10px;
+    background: rgba(0, 242, 254, 0.15);
+    border: 1px solid var(--spirit-cyan);
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 0.82rem;
+    font-weight: 700;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+  }
+
+  .btn-mobile-switch-art {
+    display: inline-flex !important;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    background: rgba(0, 242, 254, 0.12);
+    border: 1px solid rgba(0, 242, 254, 0.35);
+    color: var(--spirit-cyan);
+    border-radius: var(--radius-sm);
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .btn-mobile-switch-art:hover {
+    background: var(--spirit-cyan);
+    color: #050a14;
+  }
+
+  .card-modal-head .modal-title {
+    font-size: 1.25rem;
+    margin-bottom: 0;
+  }
 }

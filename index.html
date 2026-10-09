@@ -548,11 +548,18 @@
 
     <!-- ================= CARD DETAIL MODAL ================= -->
     <div id="cardModal" class="modal-overlay" style="display: none;">
-      <div class="modal-dialog card-modal-dialog">
+      <div class="modal-dialog card-modal-dialog" data-mobile-view="rules">
         <button class="modal-close-btn" id="cardModalClose">✕</button>
+
+        <!-- Mobile Segmented Tab Switcher (Visible only on mobile <= 768px) -->
+        <div class="modal-mobile-tabs" id="modalMobileTabs">
+          <button class="modal-mobile-tab-btn active" id="modalTabRulesBtn" data-target="rules">📜 Rules & Attacks</button>
+          <button class="modal-mobile-tab-btn" id="modalTabArtBtn" data-target="art">🖼️ Full Artwork</button>
+        </div>
+
         <div class="card-modal-content">
           <!-- Card Image & Variant Selector -->
-          <div class="card-modal-left">
+          <div class="card-modal-left" id="cardModalLeft">
             <div class="card-image-preview-frame">
               <img id="modalCardImg" src="" alt="Card Artwork" class="modal-card-image">
             </div>
@@ -562,12 +569,17 @@
                 <!-- Dynamically populated -->
               </select>
             </div>
+            <!-- Mobile-only quick toggle to jump back to rules -->
+            <button class="btn-mobile-switch-rules" id="btnMobileSwitchRules">📜 View Rules & Stats</button>
           </div>
 
           <!-- Card Stats & Rules Details -->
-          <div class="card-modal-right">
+          <div class="card-modal-right" id="cardModalRight">
             <div class="card-modal-head">
-              <h2 id="modalCardName" class="modal-title">Card Name</h2>
+              <div class="modal-title-row">
+                <h2 id="modalCardName" class="modal-title">Card Name</h2>
+                <button class="btn-mobile-switch-art" id="btnMobileSwitchArt" title="View Full Artwork Scan">🖼️ View Art</button>
+              </div>
               <div class="modal-badges" id="modalCardBadges">
                 <!-- Badges -->
               </div>
