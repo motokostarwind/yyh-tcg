@@ -484,9 +484,26 @@ function setupModalListeners() {
   });
 }
 
+function findCardByName(name) {
+  if (!name) return null;
+  const n = name.trim().toLowerCase();
+  // Exact match
+  let card = state.cards.find(c => c.name.toLowerCase() === n);
+  if (card) return card;
+  // Normalized match ignoring punctuation
+  const clean = str => str.toLowerCase().replace(/[^a-z0-9]/g, '');
+  card = state.cards.find(c => clean(c.name) === clean(n));
+  if (card) return card;
+  // Substring fallback
+  card = state.cards.find(c => c.name.toLowerCase().includes(n) || n.includes(c.name.toLowerCase()));
+  return card || null;
+}
+
 function openCardModal(card) {
   state.activeModalCard = card;
   const modal = document.getElementById('cardModal');
+  const modalContent = modal.querySelector('.card-modal-content');
+  if (modalContent) modalContent.scrollTop = 0;
 
   document.getElementById('modalCardName').textContent = card.name;
   document.getElementById('modalCardImg').src = card.images.primary;
@@ -655,28 +672,29 @@ function openCardModal(card) {
           <div class="partner-tags-row">
             <span class="partner-label">Key Partners:</span>
             ${(combo.partnerCards || []).map(p => `
-              <span class="combo-partner-tag" data-partner="${p}">
-                ${p}
-                <button class="partner-quick-add-btn" data-partner="${p}" title="Add ${p} to Deck">➕</button>
+              <span class="combo-partner-tag" data-partner="${p}" title="View ${p} in Pop-up">
+                <span class="partner-tag-name">${p}</span>
+                <span class="partner-tag-actions">
+                  <button class="partner-tag-view-btn" data-partner="${p}" title="View ${p} in Pop-up">👁️ View</button>
+                  <button class="partner-quick-add-btn" data-partner="${p}" title="Add ${p} to Deck">➕</button>
+                </span>
               </span>
             `).join('')}
           </div>
           <p class="combo-explanation">${combo.tacticalExplanation || combo.explanation || ''}</p>
         `;
 
-        // Partner tag search action
-        box.querySelectorAll('.combo-partner-tag').forEach(tag => {
+        // Partner tag view action (opens partner card directly in modal pop-up, immune to active filters)
+        box.querySelectorAll('.combo-partner-tag, .partner-tag-view-btn').forEach(tag => {
           tag.onclick = (e) => {
             if (e.target.classList.contains('partner-quick-add-btn')) return;
             e.stopPropagation();
             const partnerName = tag.dataset.partner;
-            closeCardModal();
-            const catalogTabBtn = document.querySelector('.nav-tab[data-tab="catalog"]');
-            if (catalogTabBtn) catalogTabBtn.click();
-            const searchInput = document.getElementById('searchInput');
-            if (searchInput) {
-              searchInput.value = partnerName;
-              searchInput.dispatchEvent(new Event('input'));
+            const partnerCard = findCardByName(partnerName);
+            if (partnerCard) {
+              openCardModal(partnerCard);
+            } else {
+              showToast(`Card "${partnerName}" not found in catalog.`);
             }
           };
         });
@@ -686,7 +704,7 @@ function openCardModal(card) {
           btn.onclick = (e) => {
             e.stopPropagation();
             const pName = btn.dataset.partner;
-            const pCard = state.cards.find(c => c.name.toLowerCase() === pName.toLowerCase());
+            const pCard = findCardByName(pName);
             if (pCard) {
               addCardToMainDeck(pCard.id);
             } else {
@@ -801,10 +819,10 @@ function inspectCardCombos(card) {
         partnerChipsHtml = combo.partnerCards.map(pName => {
           return `
             <span class="partner-chip">
-              <strong>${pName}</strong>
+              <strong class="partner-name-link" data-partner="${pName}" title="View ${pName} in Pop-up">${pName}</strong>
               <span class="partner-chip-actions">
-                <button class="partner-chip-btn btn-add-partner" data-partner="${pName}" title="Add ${pName} to Deck">➕</button>
-                <button class="partner-chip-btn btn-find-partner" data-partner="${pName}" title="Find ${pName} in Catalog">🔍</button>
+                <button class="partner-chip-btn btn-view-partner" data-partner="${pName}" title="View ${pName} in Pop-up">👁️ View</button>
+                <button class="partner-chip-btn btn-add-partner" data-partner="${pName}" title="Add ${pName} to Deck">➕ Add</button>
               </span>
             </span>
           `;
@@ -824,7 +842,7 @@ function inspectCardCombos(card) {
         btn.onclick = (e) => {
           e.stopPropagation();
           const pName = btn.dataset.partner;
-          const pCard = state.cards.find(c => c.name.toLowerCase() === pName.toLowerCase());
+          const pCard = findCardByName(pName);
           if (pCard) {
             addCardToMainDeck(pCard.id);
           } else {
@@ -833,14 +851,16 @@ function inspectCardCombos(card) {
         };
       });
 
-      box.querySelectorAll('.btn-find-partner').forEach(btn => {
-        btn.onclick = (e) => {
+      // View button & partner name click: opens card modal directly in pop-up (immune to category filters)
+      box.querySelectorAll('.btn-view-partner, .btn-find-partner, .partner-name-link').forEach(el => {
+        el.onclick = (e) => {
           e.stopPropagation();
-          const pName = btn.dataset.partner;
-          const searchInput = document.getElementById('searchInput');
-          if (searchInput) {
-            searchInput.value = pName;
-            searchInput.dispatchEvent(new Event('input'));
+          const pName = el.dataset.partner;
+          const pCard = findCardByName(pName);
+          if (pCard) {
+            openCardModal(pCard);
+          } else {
+            showToast(`Card "${pName}" not found in database.`);
           }
         };
       });
@@ -863,10 +883,10 @@ function inspectCardCombos(card) {
             <div class="inspector-partner-chips">
               <span class="partner-label">Recommended Partner:</span>
               <span class="partner-chip">
-                <strong>${advice.partnerCard.name}</strong>
+                <strong class="partner-name-link" data-partner="${advice.partnerCard.name}" title="View ${advice.partnerCard.name} in Pop-up">${advice.partnerCard.name}</strong>
                 <span class="partner-chip-actions">
-                  <button class="partner-chip-btn btn-add-partner" data-partner="${advice.partnerCard.name}" title="Add to Deck">➕</button>
-                  <button class="partner-chip-btn btn-find-partner" data-partner="${advice.partnerCard.name}" title="Find in Catalog">🔍</button>
+                  <button class="partner-chip-btn btn-view-partner" data-partner="${advice.partnerCard.name}" title="View ${advice.partnerCard.name} in Pop-up">👁️ View</button>
+                  <button class="partner-chip-btn btn-add-partner" data-partner="${advice.partnerCard.name}" title="Add to Deck">➕ Add</button>
                 </span>
               </span>
             </div>
@@ -881,15 +901,11 @@ function inspectCardCombos(card) {
           };
         });
 
-        box.querySelectorAll('.btn-find-partner').forEach(btn => {
-          btn.onclick = (e) => {
+        box.querySelectorAll('.btn-view-partner, .btn-find-partner, .partner-name-link').forEach(el => {
+          el.onclick = (e) => {
             e.stopPropagation();
             if (advice.partnerCard) {
-              const searchInput = document.getElementById('searchInput');
-              if (searchInput) {
-                searchInput.value = advice.partnerCard.name;
-                searchInput.dispatchEvent(new Event('input'));
-              }
+              openCardModal(advice.partnerCard);
             }
           };
         });
@@ -1215,15 +1231,20 @@ function renderDeckBuilder() {
 
     if (cardId && state.cardMap.has(cardId)) {
       const card = state.cardMap.get(cardId);
+      dropzone.classList.add('has-card');
       dropzone.innerHTML = `
         <div class="slot-assigned-view">
-          <img class="slot-char-img" src="${card.images.primary}" alt="${card.name}">
-          <div class="slot-char-name">${card.name}</div>
-          <div class="slot-char-meta">
-            <span>${card.team ? card.team.replace('Team ', '') : 'Neutral'}</span>
-            <span class="slot-char-def">DEF ${card.defense || 0}</span>
+          <div class="slot-char-img-container">
+            <img class="slot-char-img" src="${card.images.primary}" alt="${card.name}" onerror="this.src='https://placehold.co/240x336/131b2e/38bdf8?text=YYH+TCG'">
           </div>
-          <button class="slot-remove-btn" data-slot="${s}">Remove</button>
+          <div class="slot-char-info">
+            <div class="slot-char-name" title="${card.name}">${card.name}</div>
+            <div class="slot-char-meta">
+              <span>${card.team ? card.team.replace('Team ', '') : 'Neutral'}</span>
+              <span class="slot-char-def">DEF ${card.defense || 0}</span>
+            </div>
+          </div>
+          <button class="slot-remove-btn" data-slot="${s}" title="Remove ${card.name} from Slot ${s}">✕ Remove</button>
         </div>
       `;
       dropzone.querySelector('.slot-remove-btn').addEventListener('click', (e) => {
@@ -1232,6 +1253,7 @@ function renderDeckBuilder() {
       });
       dropzone.onclick = () => openCardModal(card);
     } else {
+      dropzone.classList.remove('has-card');
       dropzone.innerHTML = `
         <div class="slot-empty-state">
           <span class="empty-icon">➕</span>

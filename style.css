@@ -927,7 +927,7 @@ body {
   padding: 12px;
   display: flex;
   flex-direction: column;
-  min-height: 290px;
+  min-height: 440px;
   transition: all 0.2s ease;
 }
 
@@ -981,6 +981,8 @@ body {
   overflow: hidden;
   position: relative;
   transition: all 0.2s ease;
+  min-height: 380px;
+  padding: 6px;
 }
 
 .slot-dropzone:hover {
@@ -988,19 +990,26 @@ body {
   background: rgba(0, 242, 254, 0.05);
 }
 
+.slot-dropzone.has-card {
+  border-style: solid;
+  border-color: rgba(0, 242, 254, 0.35);
+  background: rgba(10, 16, 30, 0.65);
+}
+
 .slot-empty-state {
   text-align: center;
   color: var(--text-dim);
+  padding: 20px;
 }
 
 .slot-empty-state .empty-icon {
-  font-size: 1.5rem;
+  font-size: 2rem;
   display: block;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .slot-empty-state p {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
 }
 
@@ -1009,31 +1018,63 @@ body {
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slot-char-img-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 8px;
+  border-radius: 6px;
+  overflow: hidden;
 }
 
 .slot-char-img {
   width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 4px;
-  margin-bottom: 8px;
+  max-width: 250px;
+  height: auto;
+  aspect-ratio: 5 / 7;
+  object-fit: contain;
+  border-radius: 6px;
+  margin-bottom: 0;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+  background: #090e18;
+  display: block;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.slot-dropzone:hover .slot-char-img {
+  transform: scale(1.02);
+  box-shadow: 0 6px 18px rgba(0, 242, 254, 0.35);
+}
+
+.slot-char-info {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .slot-char-name {
-  font-size: 0.85rem;
+  font-size: 0.86rem;
   font-weight: 700;
   color: #fff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
 }
 
 .slot-char-meta {
   display: flex;
   justify-content: space-between;
-  font-size: 0.72rem;
+  width: 100%;
+  font-size: 0.74rem;
   color: var(--text-muted);
-  margin-top: 2px;
+  padding: 0 4px;
 }
 
 .slot-char-def {
@@ -1042,8 +1083,9 @@ body {
 }
 
 .slot-remove-btn {
-  margin-top: auto;
-  padding: 4px;
+  margin-top: 8px;
+  width: 100%;
+  padding: 5px;
   background: rgba(239, 68, 68, 0.15);
   border: 1px solid rgba(239, 68, 68, 0.35);
   color: #f87171;
@@ -1051,6 +1093,7 @@ body {
   font-weight: 600;
   border-radius: 4px;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 .slot-remove-btn:hover {
   background: #dc2626;
@@ -2480,15 +2523,53 @@ body {
   color: var(--spirit-cyan);
   background: rgba(0, 242, 254, 0.1);
   border: 1px solid rgba(0, 242, 254, 0.3);
-  padding: 2px 8px;
+  padding: 3px 8px;
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .combo-partner-tag:hover {
+  background: rgba(0, 242, 254, 0.2);
+  border-color: var(--spirit-cyan);
+}
+
+.partner-tag-name {
+  color: #fff;
+}
+
+.partner-tag-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.partner-tag-view-btn,
+.partner-quick-add-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 4px;
+  color: #e2e8f0;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 1px 5px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.partner-tag-view-btn:hover {
   background: var(--spirit-cyan);
   color: #050a14;
+  border-color: var(--spirit-cyan);
+}
+
+.partner-quick-add-btn:hover {
+  background: #10b981;
+  color: #fff;
+  border-color: #10b981;
 }
 
 .combo-explanation {
@@ -2819,22 +2900,44 @@ body {
   gap: 6px;
 }
 
+.partner-name-link {
+  color: #fff;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.partner-name-link:hover {
+  color: var(--spirit-cyan);
+  text-decoration: underline;
+}
+
 .partner-chip-actions {
   display: inline-flex;
   gap: 4px;
 }
 
 .partner-chip-btn {
-  background: none;
-  border: none;
-  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #cbd5e1;
   cursor: pointer;
-  font-size: 0.7rem;
-  padding: 0 2px;
-  transition: color 0.15s ease;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  transition: all 0.15s ease;
 }
-.partner-chip-btn:hover {
+
+.partner-chip-btn.btn-view-partner:hover {
+  background: var(--spirit-cyan);
+  color: #050a14;
+  border-color: var(--spirit-cyan);
+}
+
+.partner-chip-btn.btn-add-partner:hover {
+  background: #10b981;
   color: #fff;
+  border-color: #10b981;
 }
 
 .inspector-combo-desc {
