@@ -171,171 +171,306 @@ def evaluate_card(card, weights):
     trace_steps = []
     base_points = 0.0
 
-    # Base points from Character DEF (Double-Damage 2x threshold weighting)
+    # 1. Base Archetype Budget
     if card_type == 'Character':
-        # 3000 DEF is low (10 pts), 4000 is par (20 pts), 5000 is strong (32 pts), 6000 is titan (45 pts)
-        def_pts = max(5, ((defense - 2000) / 4000) * 45)
+        # DEF 2000 -> 36.0 pts, DEF 4000 -> 53.0 pts, DEF 5000 -> 61.5 pts, DEF 6000 -> 70.0 pts
+        def_pts = round(36.0 + ((defense - 2000) / 4000.0) * 34.0, 1)
         base_points += def_pts
         trace_steps.append({
             "category": "Character Baseline Defense",
-            "metric": f"{defense} DEF (2x double-damage threshold: {defense * 2} ATK)",
-            "points": round(def_pts, 1),
+            "metric": f"{defense} DEF (2x threshold: {defense * 2} ATK)",
+            "points": def_pts,
             "comment": f"Requires opponent to reach {defense * 2} ATK to inflict double wounds."
         })
+        # Attack Efficiency
+        if metrics['atk_discard_efficiency'] > 0:
+            eff_pts = round(min(12.0, (metrics['atk_discard_efficiency'] / 2000.0) * 10.0) * weights.get('atk_discard_efficiency', 1.0), 1)
+            base_points += eff_pts
+            trace_steps.append({
+                "category": "Attack-to-Discard Efficiency",
+                "metric": f"{int(metrics['atk_discard_efficiency'])} Damage / Discard",
+                "points": eff_pts,
+                "comment": "Damage output per hand discard ammunition."
+            })
+        if metrics['flat_atk_boost'] > 0:
+            atk_pts = round(min(10.0, (metrics['flat_atk_boost'] / 3000.0) * 8.0) * weights.get('flat_atk_boost', 1.0), 1)
+            base_points += atk_pts
+            trace_steps.append({
+                "category": "Attack Ability Bonus",
+                "metric": f"+{metrics['flat_atk_boost']} ATK",
+                "points": atk_pts,
+                "comment": "Inherent fighter special attack punch."
+            })
+        if metrics['flat_def_boost'] > 0:
+            def_b_pts = round(min(10.0, (metrics['flat_def_boost'] / 2000.0) * 8.0) * weights.get('flat_def_boost', 1.0), 1)
+            base_points += def_b_pts
+            trace_steps.append({
+                "category": "Defensive Combat Buff",
+                "metric": f"+{metrics['flat_def_boost']} DEF",
+                "points": def_b_pts,
+                "comment": "Temporary combat defense protection."
+            })
 
-    # Add points for each active category
-    if metrics['flat_atk_boost'] > 0:
-        pts = (metrics['flat_atk_boost'] / 2000) * 25 * weights.get('flat_atk_boost', 1.1)
-        pts = min(45, pts)
-        base_points += pts
+    elif card_type == 'Item':
+        base_points += 46.0
         trace_steps.append({
-            "category": "Flat Attack Boost",
-            "metric": f"+{metrics['flat_atk_boost']} ATK",
-            "points": round(pts, 1),
-            "comment": "Pushes attacks over opponent DEF / into double-damage range."
+            "category": "Item Equipment Budget",
+            "metric": "Persistent Attached Equipment",
+            "points": 46.0,
+            "comment": "Multi-turn equipment base value on arena fighter."
         })
+        if metrics['flat_atk_boost'] > 0:
+            atk_pts = round(min(18.0, (metrics['flat_atk_boost'] / 2500.0) * 12.0) * weights.get('flat_atk_boost', 1.0), 1)
+            base_points += atk_pts
+            trace_steps.append({
+                "category": "Flat Attack Boost",
+                "metric": f"+{metrics['flat_atk_boost']} ATK",
+                "points": atk_pts,
+                "comment": "Increases attack value to threaten lethal double-damage."
+            })
+        if metrics['flat_def_boost'] > 0:
+            def_pts = round(min(16.0, (metrics['flat_def_boost'] / 2000.0) * 12.0) * weights.get('flat_def_boost', 1.0), 1)
+            base_points += def_pts
+            trace_steps.append({
+                "category": "Flat Defense Boost",
+                "metric": f"+{metrics['flat_def_boost']} DEF",
+                "points": def_pts,
+                "comment": "Increases attached character double-damage survival cliff."
+            })
 
-    if metrics['flat_def_boost'] > 0:
-        pts = (metrics['flat_def_boost'] / 1500) * 28 * weights.get('flat_def_boost', 1.35)
-        pts = min(50, pts)
-        base_points += pts
+    elif card_type == 'Technique':
+        base_points += 45.0
         trace_steps.append({
-            "category": "Flat Defense Boost",
-            "metric": f"+{metrics['flat_def_boost']} DEF",
-            "points": round(pts, 1),
-            "comment": "Raises fighter survivability and prevents double-damage."
+            "category": "Technique Move Budget",
+            "metric": "Attached Signature Technique",
+            "points": 45.0,
+            "comment": "Reusable attached special move budget."
         })
+        if metrics['flat_atk_boost'] > 0:
+            atk_pts = round(min(18.0, (metrics['flat_atk_boost'] / 2500.0) * 12.0) * weights.get('flat_atk_boost', 1.0), 1)
+            base_points += atk_pts
+            trace_steps.append({
+                "category": "Flat Attack Boost",
+                "metric": f"+{metrics['flat_atk_boost']} ATK",
+                "points": atk_pts,
+                "comment": "Increases attack value to threaten lethal double-damage."
+            })
+        if metrics['flat_def_boost'] > 0:
+            def_pts = round(min(16.0, (metrics['flat_def_boost'] / 2000.0) * 12.0) * weights.get('flat_def_boost', 1.0), 1)
+            base_points += def_pts
+            trace_steps.append({
+                "category": "Flat Defense Boost",
+                "metric": f"+{metrics['flat_def_boost']} DEF",
+                "points": def_pts,
+                "comment": "Increases attached character double-damage survival cliff."
+            })
+        if metrics['atk_discard_efficiency'] > 0:
+            eff_pts = round(min(8.0, (metrics['atk_discard_efficiency'] / 2000.0) * 6.0) * weights.get('atk_discard_efficiency', 1.0), 1)
+            base_points += eff_pts
+            trace_steps.append({
+                "category": "Attack Damage Efficiency",
+                "metric": f"{int(metrics['atk_discard_efficiency'])} Dmg / Cost",
+                "points": eff_pts,
+                "comment": "Preserves hand ammunition during resolution."
+            })
 
-    if metrics['atk_discard_efficiency'] > 0:
-        pts = (metrics['atk_discard_efficiency'] / 2000) * 20 * weights.get('atk_discard_efficiency', 1.25)
-        pts = min(40, pts)
-        base_points += pts
+    else:  # Event / Special Moves
+        base_points += 44.0
         trace_steps.append({
-            "category": "Attack-to-Discard Efficiency",
-            "metric": f"{int(metrics['atk_discard_efficiency'])} Damage / Discard",
-            "points": round(pts, 1),
-            "comment": "High damage-to-cost ratio preserves hand ammunition."
+            "category": "Event Tactical Budget",
+            "metric": "1-for-1 Tactical Resolution",
+            "points": 44.0,
+            "comment": "Standard burst effect baseline."
         })
+        if metrics['flat_atk_boost'] > 0:
+            atk_pts = round(min(16.0, (metrics['flat_atk_boost'] / 2500.0) * 12.0) * weights.get('flat_atk_boost', 1.0), 1)
+            base_points += atk_pts
+            trace_steps.append({
+                "category": "Flat Attack Boost",
+                "metric": f"+{metrics['flat_atk_boost']} ATK",
+                "points": atk_pts,
+                "comment": "Single-turn attack pump."
+            })
+        if metrics['flat_def_boost'] > 0:
+            def_pts = round(min(16.0, (metrics['flat_def_boost'] / 2000.0) * 12.0) * weights.get('flat_def_boost', 1.0), 1)
+            base_points += def_pts
+            trace_steps.append({
+                "category": "Flat Defense Boost",
+                "metric": f"+{metrics['flat_def_boost']} DEF",
+                "points": def_pts,
+                "comment": "Single-turn defense pump."
+            })
 
+    # Universal Modifiers
     if metrics['absolute_stall'] > 0:
-        pts = metrics['absolute_stall'] * weights.get('absolute_stall', 1.65) * 0.6
-        base_points += pts
+        stall_pts = round(min(32.0, metrics['absolute_stall'] * 0.75) * weights.get('absolute_stall', 1.0), 1)
+        base_points += stall_pts
         trace_steps.append({
             "category": "Absolute Attack Stalling",
             "metric": "Attack Step Cancellation",
-            "points": round(pts, 1),
+            "points": stall_pts,
             "comment": "Neutralizes opponent strike and attached pump cards."
         })
 
     if metrics['wound_mitigation'] > 0:
-        pts = metrics['wound_mitigation'] * weights.get('wound_mitigation', 1.30) * 0.5
-        base_points += pts
+        mit_pts = round(min(16.0, metrics['wound_mitigation'] * 0.45) * weights.get('wound_mitigation', 1.0), 1)
+        base_points += mit_pts
         trace_steps.append({
             "category": "Wound & Damage Mitigation",
             "metric": "Damage Absorption/Healing",
-            "points": round(pts, 1),
+            "points": mit_pts,
             "comment": "Extends character lifespan and protects match slots."
         })
 
-    if metrics['net_card_delta'] != 0:
-        pts = metrics['net_card_delta'] * 15 * weights.get('net_card_delta', 1.45)
-        base_points += pts
+    if metrics['sideline_reposition'] > 0:
+        repo_pts = round(min(12.0, metrics['sideline_reposition'] * 0.40) * weights.get('sideline_reposition', 1.0), 1)
+        base_points += repo_pts
+        trace_steps.append({
+            "category": "Sideline Repositioning",
+            "metric": "Fighter Switching / Dodging",
+            "points": repo_pts,
+            "comment": "Protects wounded fighters by swapping to sideline."
+        })
+
+    delta = metrics['net_card_delta']
+    if delta > 0:
+        card_pts = round(min(22.0, delta * 11.0) * weights.get('net_card_delta', 1.0), 1)
+        base_points += card_pts
         trace_steps.append({
             "category": "Net Hand Advantage",
-            "metric": f"{metrics['net_card_delta']:+d} Net Cards",
-            "points": round(pts, 1),
-            "comment": "Direct card equity delta based on Garfield advantage theory."
+            "metric": f"+{delta} Net Cards",
+            "points": card_pts,
+            "comment": "Raw card advantage based on Garfield theory."
+        })
+    elif delta < -1:
+        card_pts = round(-min(18.0, abs(delta + 1) * 8.0) * weights.get('net_card_delta', 1.0), 1)
+        base_points += card_pts
+        trace_steps.append({
+            "category": "Hand Discard Cost Penalty",
+            "metric": f"{abs(delta + 1)} Additional Discards",
+            "points": card_pts,
+            "comment": "Depletes hand ammunition beyond normal 1-for-1 play."
         })
 
     if metrics['tutor_equity'] > 0:
-        pts = metrics['tutor_equity'] * weights.get('tutor_equity', 1.40) * 0.65
-        base_points += pts
+        tut_pts = round(min(18.0, metrics['tutor_equity'] * 0.50) * weights.get('tutor_equity', 1.0), 1)
+        base_points += tut_pts
         trace_steps.append({
             "category": "Targeted Tutor / Search",
             "metric": "Deck Search Target",
-            "points": round(pts, 1),
-            "comment": "Direct deck search eliminates draw variance."
+            "points": tut_pts,
+            "comment": "Eliminates draw variance and retrieves key combo pieces."
         })
 
     if metrics['recursion_equity'] > 0:
-        pts = metrics['recursion_equity'] * weights.get('recursion_equity', 1.10) * 0.6
-        base_points += pts
+        rec_pts = round(min(14.0, metrics['recursion_equity'] * 0.40) * weights.get('recursion_equity', 1.0), 1)
+        base_points += rec_pts
         trace_steps.append({
             "category": "Discard Pile Recursion",
             "metric": "Graveyard Retrieval",
-            "points": round(pts, 1),
-            "comment": "Longevity and key combo retrieval from discard."
+            "points": rec_pts,
+            "comment": "Recycles key cards or extends deck life against mill."
         })
 
     if metrics['se_delta'] > 0:
-        pts = metrics['se_delta'] * 12 * weights.get('se_delta', 1.25)
-        base_points += pts
+        se_pts = round(min(16.0, metrics['se_delta'] * 7.0) * weights.get('se_delta', 1.0), 1)
+        base_points += se_pts
         trace_steps.append({
             "category": "Spirit Energy Generation",
-            "metric": f"+{metrics['se_delta']} SE",
-            "points": round(pts, 1),
-            "comment": "Ramps tempo ahead of normal draw step limits."
+            "metric": f"+{metrics['se_delta']} SE Ramped",
+            "points": se_pts,
+            "comment": "Accelerates tempo ahead of normal draw step curve."
         })
 
     if card_type in ['Event', 'Item', 'Technique']:
+        se_friction_w = weights.get('se_cost_friction', 1.0)
         if se_cost == 0:
-            pts = 12 * weights.get('se_cost_friction', 0.9)
-            base_points += pts
+            base_points += 4.0 * se_friction_w
             trace_steps.append({
                 "category": "Spirit Energy Cost Friction",
                 "metric": "0 SE Cost (Free Tempo)",
-                "points": round(pts, 1),
-                "comment": "Zero friction; playable immediately without energy banking."
+                "points": round(4.0 * se_friction_w, 1),
+                "comment": "Zero energy friction; playable immediately turn 1."
             })
-        elif se_cost is not None and se_cost > 0:
-            pts = -(se_cost * 6) * weights.get('se_cost_friction', 0.9)
-            base_points += pts
+        elif se_cost == 1:
+            base_points -= 2.0 * se_friction_w
             trace_steps.append({
                 "category": "Spirit Energy Cost Friction",
-                "metric": f"{se_cost} SE Cost Penalty",
-                "points": round(pts, 1),
-                "comment": "Requires energy banking; dead-hand friction on early turns."
+                "metric": "1 SE Cost Gate",
+                "points": round(-2.0 * se_friction_w, 1),
+                "comment": "Minor energy friction; requires 1 banked SE."
+            })
+        elif se_cost == 2:
+            base_points -= 5.0 * se_friction_w
+            trace_steps.append({
+                "category": "Spirit Energy Cost Friction",
+                "metric": "2 SE Cost Gate",
+                "points": round(-5.0 * se_friction_w, 1),
+                "comment": "Moderate tempo delay; requires 2 banked SE."
+            })
+        elif se_cost and se_cost >= 3:
+            pen = (5.0 + (se_cost - 2) * 3.5) * se_friction_w
+            base_points -= pen
+            trace_steps.append({
+                "category": "Spirit Energy Cost Friction",
+                "metric": f"{se_cost} SE Heavy Cost",
+                "points": round(-pen, 1),
+                "comment": "Severe energy friction; dead card in early turns."
             })
 
     if metrics['opp_hand_discard'] > 0:
-        pts = metrics['opp_hand_discard'] * weights.get('opp_hand_discard', 1.35) * 0.6
-        base_points += pts
+        disc_pts = round(min(20.0, metrics['opp_hand_discard'] * 0.50) * weights.get('opp_hand_discard', 1.0), 1)
+        base_points += disc_pts
         trace_steps.append({
             "category": "Opponent Hand Depletion",
             "metric": "Forced Discard Disruption",
-            "points": round(pts, 1),
-            "comment": "Strips opponent hand of defense cards and attack fuel."
+            "points": disc_pts,
+            "comment": "Strips opponent of defensive responses and attack fuel."
         })
 
-    # Apply Permanence Multiplier
-    perm_mult = metrics['permanence_multiplier']
-    if perm_mult > 1.0:
-        base_points *= perm_mult
+    if metrics['opp_deck_mill'] > 0:
+        mill_pts = round(min(18.0, metrics['opp_deck_mill'] * 0.45) * weights.get('opp_deck_mill', 1.0), 1)
+        base_points += mill_pts
         trace_steps.append({
-            "category": "Permanence Multiplier",
-            "metric": f"{perm_mult}x Durability Multiplier",
-            "points": round(base_points * (perm_mult - 1.0), 1),
-            "comment": "Multi-turn attached benefit extends value across rounds."
+            "category": "Opponent Deck Milling",
+            "metric": "Topdeck Depletion",
+            "points": mill_pts,
+            "comment": "Accelerates opponent towards deck-out loss condition."
         })
 
-    # Normalize Final Standalone Rating to 0-100 scale
-    # Raw points typically range 20 to 120
-    final_score = round(max(15, min(99, (base_points / 95.0) * 85.0 + 10)), 1)
+    if metrics['opp_resource_denial'] > 0:
+        den_pts = round(min(16.0, metrics['opp_resource_denial'] * 0.50) * weights.get('opp_resource_denial', 1.0), 1)
+        base_points += den_pts
+        trace_steps.append({
+            "category": "Opponent Resource Denial",
+            "metric": "Item/SE Removal",
+            "points": den_pts,
+            "comment": "Destroys opponent equipment or removes banked energy."
+        })
+
+    # Final Score is the exact calibrated points sum clamped to realistic 20-97 scale
+    final_score = round(max(20.0, min(97.0, base_points)), 1)
     
-    # Assign Tier
-    if final_score >= 90:
+    # Assign Tier cleanly on calibrated scale:
+    # S-Tier (>=88): Top ~2.5% of the game (meta defining)
+    # A-Tier (74-87): Top ~15% of the game (competitive mainstays)
+    # B-Tier (56-73): ~38% of the game (solid viable cards)
+    # C-Tier (42-55): ~32% of the game (average/filler)
+    # D-Tier (<42): ~12% of the game (severely outclassed)
+    if final_score >= 88.0:
         tier = "S-Tier"
-    elif final_score >= 78:
+    elif final_score >= 74.0:
         tier = "A-Tier"
-    elif final_score >= 62:
+    elif final_score >= 56.0:
         tier = "B-Tier"
-    elif final_score >= 48:
+    elif final_score >= 42.0:
         tier = "C-Tier"
     else:
         tier = "D-Tier"
 
     # Peak Synergy Rating
-    synergy_score = round(min(99, final_score + (metrics['item_affinity'] + metrics['event_discard_affinity'] + metrics['team_alignment_lock']) * 0.4), 1)
+    syn_bonus = (metrics['item_affinity'] + metrics['event_discard_affinity'] + metrics['team_alignment_lock']) * 0.35
+    synergy_score = round(min(98.0, final_score + syn_bonus), 1)
 
     # ----------------------------------------------------
     # 3. GENERATE AGENT PERSPECTIVES
@@ -370,6 +505,7 @@ def evaluate_card(card, weights):
             f"Stat budget ratio aligns with {tier} standard curve."
         )
     elif card_type in ['Event', 'Item', 'Technique']:
+        perm_mult = metrics.get('permanence_multiplier', 1.0)
         theorist_notes = (
             f"Resource Elasticity: Card operates at {se_cost or 0} SE with net hand delta of {metrics['net_card_delta']:+d}. "
             f"{'Permanence multiplier of ' + str(perm_mult) + 'x applied due to continuous attachment.' if perm_mult > 1 else 'Single-phase burst spell.'} "

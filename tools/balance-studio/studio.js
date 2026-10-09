@@ -278,63 +278,322 @@
         return;
       }
 
+      const ctype = card.cardType || 'Event';
       const m = card.metrics || {};
-      let rawScore = 0;
+      const seCost = card.seCost !== null && card.seCost !== undefined ? card.seCost : (m.se_cost_friction || 0);
+      let basePoints = 0.0;
+      const trace = [];
 
-      // Combat Primitives
-      rawScore += Math.min(45, (m.flat_atk_boost || 0) / 75) * (weights.flat_atk_boost || 1.0);
-      rawScore += Math.min(50, ((m.flat_def_boost || 0) / 1500) * 28) * (weights.flat_def_boost || 1.0);
-      rawScore += Math.min(35, ((m.atk_discard_efficiency || 0) / 800) * 10) * (weights.atk_discard_efficiency || 1.0);
-      rawScore += (m.absolute_stall || 0) * (weights.absolute_stall || 1.0);
-      rawScore += (m.wound_mitigation || 0) * (weights.wound_mitigation || 1.0);
-      rawScore += (m.sideline_reposition || 0) * (weights.sideline_reposition || 1.0);
-
-      // Economy Primitives
-      rawScore += (m.net_card_delta || 0) * 15 * (weights.net_card_delta || 1.0);
-      rawScore += (m.tutor_equity || 0) * (weights.tutor_equity || 1.0);
-      rawScore += (m.recursion_equity || 0) * (weights.recursion_equity || 1.0);
-      rawScore += (m.se_delta || 0) * 12 * (weights.se_delta || 1.0);
-
-      // SE Cost Friction penalty
-      const seCost = m.se_cost_friction || 0;
-      if (seCost === 0) rawScore += 8 * (weights.se_cost_friction || 1.0);
-      else if (seCost === 1) rawScore -= 4 * (weights.se_cost_friction || 1.0);
-      else if (seCost === 2) rawScore -= 9 * (weights.se_cost_friction || 1.0);
-      else if (seCost >= 3) rawScore -= (14 + (seCost - 3) * 6) * (weights.se_cost_friction || 1.0);
-
-      // Disruption
-      rawScore += (m.opp_hand_discard || 0) * (weights.opp_hand_discard || 1.0);
-      rawScore += (m.opp_deck_mill || 0) * (weights.opp_deck_mill || 1.0);
-      rawScore += (m.opp_resource_denial || 0) * (weights.opp_resource_denial || 1.0);
-
-      // Permanence Multiplier
-      const perm = m.permanence_multiplier || 1.0;
-      const permWeight = weights.permanence_multiplier || 1.0;
-      const effectivePerm = 1.0 + (perm - 1.0) * permWeight;
-      rawScore *= effectivePerm;
-
-      // Character Baseline Defense anchor
-      if (card.cardType === 'Character') {
-        const def = card.defense || 0;
-        if (def >= 6000) rawScore += 32;
-        else if (def >= 5000) rawScore += 25;
-        else if (def >= 4000) rawScore += 18;
-        else if (def >= 3000) rawScore += 12;
+      // 1. Base Archetype Budget
+      if (ctype === 'Character') {
+        const defVal = card.defense || 4000;
+        const defPts = Math.round((36.0 + ((defVal - 2000) / 4000.0) * 34.0) * 10) / 10;
+        basePoints += defPts;
+        trace.push({
+          category: 'Character Baseline Defense',
+          metric: `${defVal} DEF (2x threshold: ${defVal * 2} ATK)`,
+          points: defPts,
+          comment: `Requires opponent to reach ${defVal * 2} ATK to inflict double wounds.`
+        });
+        if (m.atk_discard_efficiency > 0) {
+          const effPts = Math.round(Math.min(12.0, (m.atk_discard_efficiency / 2000.0) * 10.0) * (weights.atk_discard_efficiency || 1.0) * 10) / 10;
+          basePoints += effPts;
+          trace.push({
+            category: 'Attack-to-Discard Efficiency',
+            metric: `${Math.round(m.atk_discard_efficiency)} Damage / Discard`,
+            points: effPts,
+            comment: 'Damage output per hand discard ammunition.'
+          });
+        }
+        if (m.flat_atk_boost > 0) {
+          const atkPts = Math.round(Math.min(10.0, (m.flat_atk_boost / 3000.0) * 8.0) * (weights.flat_atk_boost || 1.0) * 10) / 10;
+          basePoints += atkPts;
+          trace.push({
+            category: 'Attack Ability Bonus',
+            metric: `+${m.flat_atk_boost} ATK`,
+            points: atkPts,
+            comment: 'Inherent fighter special attack punch.'
+          });
+        }
+        if (m.flat_def_boost > 0) {
+          const defBPts = Math.round(Math.min(10.0, (m.flat_def_boost / 2000.0) * 8.0) * (weights.flat_def_boost || 1.0) * 10) / 10;
+          basePoints += defBPts;
+          trace.push({
+            category: 'Defensive Combat Buff',
+            metric: `+${m.flat_def_boost} DEF`,
+            points: defBPts,
+            comment: 'Temporary combat defense protection.'
+          });
+        }
+      } else if (ctype === 'Item') {
+        basePoints += 46.0;
+        trace.push({
+          category: 'Item Equipment Budget',
+          metric: 'Persistent Attached Equipment',
+          points: 46.0,
+          comment: 'Multi-turn equipment base value on arena fighter.'
+        });
+        if (m.flat_atk_boost > 0) {
+          const atkPts = Math.round(Math.min(18.0, (m.flat_atk_boost / 2500.0) * 12.0) * (weights.flat_atk_boost || 1.0) * 10) / 10;
+          basePoints += atkPts;
+          trace.push({
+            category: 'Flat Attack Boost',
+            metric: `+${m.flat_atk_boost} ATK`,
+            points: atkPts,
+            comment: 'Increases attack value to threaten lethal double-damage.'
+          });
+        }
+        if (m.flat_def_boost > 0) {
+          const defPts = Math.round(Math.min(16.0, (m.flat_def_boost / 2000.0) * 12.0) * (weights.flat_def_boost || 1.0) * 10) / 10;
+          basePoints += defPts;
+          trace.push({
+            category: 'Flat Defense Boost',
+            metric: `+${m.flat_def_boost} DEF`,
+            points: defPts,
+            comment: 'Increases attached character double-damage survival cliff.'
+          });
+        }
+      } else if (ctype === 'Technique') {
+        basePoints += 45.0;
+        trace.push({
+          category: 'Technique Move Budget',
+          metric: 'Attached Signature Technique',
+          points: 45.0,
+          comment: 'Reusable attached special move budget.'
+        });
+        if (m.flat_atk_boost > 0) {
+          const atkPts = Math.round(Math.min(18.0, (m.flat_atk_boost / 2500.0) * 12.0) * (weights.flat_atk_boost || 1.0) * 10) / 10;
+          basePoints += atkPts;
+          trace.push({
+            category: 'Flat Attack Boost',
+            metric: `+${m.flat_atk_boost} ATK`,
+            points: atkPts,
+            comment: 'Increases attack value to threaten lethal double-damage.'
+          });
+        }
+        if (m.flat_def_boost > 0) {
+          const defPts = Math.round(Math.min(16.0, (m.flat_def_boost / 2000.0) * 12.0) * (weights.flat_def_boost || 1.0) * 10) / 10;
+          basePoints += defPts;
+          trace.push({
+            category: 'Flat Defense Boost',
+            metric: `+${m.flat_def_boost} DEF`,
+            points: defPts,
+            comment: 'Increases attached character double-damage survival cliff.'
+          });
+        }
+        if (m.atk_discard_efficiency > 0) {
+          const effPts = Math.round(Math.min(8.0, (m.atk_discard_efficiency / 2000.0) * 6.0) * (weights.atk_discard_efficiency || 1.0) * 10) / 10;
+          basePoints += effPts;
+          trace.push({
+            category: 'Attack Damage Efficiency',
+            metric: `${Math.round(m.atk_discard_efficiency)} Dmg / Cost`,
+            points: effPts,
+            comment: 'Preserves hand ammunition during resolution.'
+          });
+        }
+      } else { // Event / Special Moves
+        basePoints += 44.0;
+        trace.push({
+          category: 'Event Tactical Budget',
+          metric: '1-for-1 Tactical Resolution',
+          points: 44.0,
+          comment: 'Standard burst effect baseline.'
+        });
+        if (m.flat_atk_boost > 0) {
+          const atkPts = Math.round(Math.min(16.0, (m.flat_atk_boost / 2500.0) * 12.0) * (weights.flat_atk_boost || 1.0) * 10) / 10;
+          basePoints += atkPts;
+          trace.push({
+            category: 'Flat Attack Boost',
+            metric: `+${m.flat_atk_boost} ATK`,
+            points: atkPts,
+            comment: 'Single-turn attack pump.'
+          });
+        }
+        if (m.flat_def_boost > 0) {
+          const defPts = Math.round(Math.min(16.0, (m.flat_def_boost / 2000.0) * 12.0) * (weights.flat_def_boost || 1.0) * 10) / 10;
+          basePoints += defPts;
+          trace.push({
+            category: 'Flat Defense Boost',
+            metric: `+${m.flat_def_boost} DEF`,
+            points: defPts,
+            comment: 'Single-turn defense pump.'
+          });
+        }
       }
 
-      // Clamp score
-      let finalScore = Math.max(12.0, Math.min(99.0, Math.round(rawScore * 10) / 10));
-      card.score = finalScore;
+      // Universal Modifiers
+      if (m.absolute_stall > 0) {
+        const stallPts = Math.round(Math.min(32.0, m.absolute_stall * 0.75) * (weights.absolute_stall || 1.0) * 10) / 10;
+        basePoints += stallPts;
+        trace.push({
+          category: 'Absolute Attack Stalling',
+          metric: 'Attack Step Cancellation',
+          points: stallPts,
+          comment: 'Neutralizes opponent strike and attached pump cards.'
+        });
+      }
 
-      // Recompute Tier
-      if (finalScore >= 90) card.tier = 'S-Tier';
-      else if (finalScore >= 78) card.tier = 'A-Tier';
-      else if (finalScore >= 60) card.tier = 'B-Tier';
-      else if (finalScore >= 42) card.tier = 'C-Tier';
+      if (m.wound_mitigation > 0) {
+        const mitPts = Math.round(Math.min(16.0, m.wound_mitigation * 0.45) * (weights.wound_mitigation || 1.0) * 10) / 10;
+        basePoints += mitPts;
+        trace.push({
+          category: 'Wound & Damage Mitigation',
+          metric: 'Damage Absorption/Healing',
+          points: mitPts,
+          comment: 'Extends character lifespan and protects match slots.'
+        });
+      }
+
+      if (m.sideline_reposition > 0) {
+        const repoPts = Math.round(Math.min(12.0, m.sideline_reposition * 0.40) * (weights.sideline_reposition || 1.0) * 10) / 10;
+        basePoints += repoPts;
+        trace.push({
+          category: 'Sideline Repositioning',
+          metric: 'Fighter Switching / Dodging',
+          points: repoPts,
+          comment: 'Protects wounded fighters by swapping to sideline.'
+        });
+      }
+
+      const delta = m.net_card_delta || 0;
+      if (delta > 0) {
+        const cardPts = Math.round(Math.min(22.0, delta * 11.0) * (weights.net_card_delta || 1.0) * 10) / 10;
+        basePoints += cardPts;
+        trace.push({
+          category: 'Net Hand Advantage',
+          metric: `+${delta} Net Cards`,
+          points: cardPts,
+          comment: 'Raw card advantage based on Garfield theory.'
+        });
+      } else if (delta < -1) {
+        const cardPts = Math.round(-Math.min(18.0, Math.abs(delta + 1) * 8.0) * (weights.net_card_delta || 1.0) * 10) / 10;
+        basePoints += cardPts;
+        trace.push({
+          category: 'Hand Discard Cost Penalty',
+          metric: `${Math.abs(delta + 1)} Additional Discards`,
+          points: cardPts,
+          comment: 'Depletes hand ammunition beyond normal 1-for-1 play.'
+        });
+      }
+
+      if (m.tutor_equity > 0) {
+        const tutPts = Math.round(Math.min(18.0, m.tutor_equity * 0.50) * (weights.tutor_equity || 1.0) * 10) / 10;
+        basePoints += tutPts;
+        trace.push({
+          category: 'Targeted Tutor / Search',
+          metric: 'Deck Search Target',
+          points: tutPts,
+          comment: 'Eliminates draw variance and retrieves key combo pieces.'
+        });
+      }
+
+      if (m.recursion_equity > 0) {
+        const recPts = Math.round(Math.min(14.0, m.recursion_equity * 0.40) * (weights.recursion_equity || 1.0) * 10) / 10;
+        basePoints += recPts;
+        trace.push({
+          category: 'Discard Pile Recursion',
+          metric: 'Graveyard Retrieval',
+          points: recPts,
+          comment: 'Recycles key cards or extends deck life against mill.'
+        });
+      }
+
+      if (m.se_delta > 0) {
+        const sePts = Math.round(Math.min(16.0, m.se_delta * 7.0) * (weights.se_delta || 1.0) * 10) / 10;
+        basePoints += sePts;
+        trace.push({
+          category: 'Spirit Energy Generation',
+          metric: `+${m.se_delta} SE Ramped`,
+          points: sePts,
+          comment: 'Accelerates tempo ahead of normal draw step curve.'
+        });
+      }
+
+      if (ctype === 'Event' || ctype === 'Item' || ctype === 'Technique') {
+        const seFrictionW = weights.se_cost_friction || 1.0;
+        if (seCost === 0) {
+          const pts = Math.round(4.0 * seFrictionW * 10) / 10;
+          basePoints += pts;
+          trace.push({
+            category: 'Spirit Energy Cost Friction',
+            metric: '0 SE Cost (Free Tempo)',
+            points: pts,
+            comment: 'Zero energy friction; playable immediately turn 1.'
+          });
+        } else if (seCost === 1) {
+          const pts = Math.round(-2.0 * seFrictionW * 10) / 10;
+          basePoints += pts;
+          trace.push({
+            category: 'Spirit Energy Cost Friction',
+            metric: '1 SE Cost Gate',
+            points: pts,
+            comment: 'Minor energy friction; requires 1 banked SE.'
+          });
+        } else if (seCost === 2) {
+          const pts = Math.round(-5.0 * seFrictionW * 10) / 10;
+          basePoints += pts;
+          trace.push({
+            category: 'Spirit Energy Cost Friction',
+            metric: '2 SE Cost Gate',
+            points: pts,
+            comment: 'Moderate tempo delay; requires 2 banked SE.'
+          });
+        } else if (seCost >= 3) {
+          const pen = Math.round((5.0 + (seCost - 2) * 3.5) * seFrictionW * 10) / 10;
+          basePoints -= pen;
+          trace.push({
+            category: 'Spirit Energy Cost Friction',
+            metric: `${seCost} SE Heavy Cost`,
+            points: -pen,
+            comment: 'Severe energy friction; dead card in early turns.'
+          });
+        }
+      }
+
+      if (m.opp_hand_discard > 0) {
+        const discPts = Math.round(Math.min(20.0, m.opp_hand_discard * 0.50) * (weights.opp_hand_discard || 1.0) * 10) / 10;
+        basePoints += discPts;
+        trace.push({
+          category: 'Opponent Hand Depletion',
+          metric: 'Forced Discard Disruption',
+          points: discPts,
+          comment: 'Strips opponent of defensive responses and attack fuel.'
+        });
+      }
+
+      if (m.opp_deck_mill > 0) {
+        const millPts = Math.round(Math.min(18.0, m.opp_deck_mill * 0.45) * (weights.opp_deck_mill || 1.0) * 10) / 10;
+        basePoints += millPts;
+        trace.push({
+          category: 'Opponent Deck Milling',
+          metric: 'Topdeck Depletion',
+          points: millPts,
+          comment: 'Accelerates opponent towards deck-out loss condition.'
+        });
+      }
+
+      if (m.opp_resource_denial > 0) {
+        const denPts = Math.round(Math.min(16.0, m.opp_resource_denial * 0.50) * (weights.opp_resource_denial || 1.0) * 10) / 10;
+        basePoints += denPts;
+        trace.push({
+          category: 'Opponent Resource Denial',
+          metric: 'Item/SE Removal',
+          points: denPts,
+          comment: 'Destroys opponent equipment or removes banked energy.'
+        });
+      }
+
+      const finalScore = Math.round(Math.max(20.0, Math.min(97.0, basePoints)) * 10) / 10;
+      card.score = finalScore;
+      card.trace = trace;
+
+      if (finalScore >= 88.0) card.tier = 'S-Tier';
+      else if (finalScore >= 74.0) card.tier = 'A-Tier';
+      else if (finalScore >= 56.0) card.tier = 'B-Tier';
+      else if (finalScore >= 42.0) card.tier = 'C-Tier';
       else card.tier = 'D-Tier';
     });
 
-    // Refresh currently displayed card
     if (state.filteredCards.length > 0 && state.currentIndex < state.filteredCards.length) {
       displayCard(state.currentIndex);
     }

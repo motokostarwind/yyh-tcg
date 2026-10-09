@@ -1,4 +1,14 @@
 {
-  "reviews": {},
+  "reviews": {
+    "GF-R4": {
+      "cardId": "GF-R4",
+      "cardName": "Risho, Butajiri's Henchman",
+      "decision": "dispute",
+      "timestamp": "2026-10-09T21:01:46.437Z",
+      "category": "Overall Score",
+      "suggestedScore": 50,
+      "notes": "There are so many better heroes out there. Yes it has an attack to gain 2000 defense, but with 3k attack he's not killing anyone without substantial cards and with only 4k base defense, people can still deal double damage to him with a couple of attack boosting cards."
+    }
+  },
   "heuristics": []
 }

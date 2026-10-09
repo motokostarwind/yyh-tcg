@@ -106,13 +106,13 @@ def run_recalibration(custom_weights=None):
                     adjusted_score = round(target_score * 0.85 + old_score * 0.15, 1)
                     card["score"] = adjusted_score
                     
-                    if adjusted_score >= 90:
+                    if adjusted_score >= 88.0:
                         card["tier"] = "S-Tier"
-                    elif adjusted_score >= 78:
+                    elif adjusted_score >= 74.0:
                         card["tier"] = "A-Tier"
-                    elif adjusted_score >= 60:
+                    elif adjusted_score >= 56.0:
                         card["tier"] = "B-Tier"
-                    elif adjusted_score >= 42:
+                    elif adjusted_score >= 42.0:
                         card["tier"] = "C-Tier"
                     else:
                         card["tier"] = "D-Tier"
