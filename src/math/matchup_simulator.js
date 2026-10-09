@@ -126,8 +126,22 @@ const META_GAUNTLET_DECKS = {
  * @param {number} runsPerMatchup - Number of simulation runs per opponent deck (e.g. 250 = 1000 total)
  * @returns {object} Simulation results including win rates, pairing strengths, and combo stats
  */
-function simulateDeckMatchups(playerDeckState, cardMap, comboCatalog = [], runsPerMatchup = 250) {
+function simulateDeckMatchups(playerDeckState, cardMap, comboCatalog = [], runsPerMatchup = 250, customGauntlet = null) {
   const getCard = (id) => cardMap instanceof Map ? cardMap.get(id) : cardMap[id];
+
+  // Resolve which gauntlet decks to simulate against
+  let gauntletToUse = META_GAUNTLET_DECKS;
+  if (customGauntlet && typeof customGauntlet === 'object') {
+    const filtered = {};
+    for (const [key, d] of Object.entries(customGauntlet)) {
+      if (d && d.enabled !== false) {
+        filtered[key] = d;
+      }
+    }
+    if (Object.keys(filtered).length > 0) {
+      gauntletToUse = filtered;
+    }
+  }
 
   // Flatten player's main deck into card array
   const playerDeckList = [];
@@ -173,8 +187,11 @@ function simulateDeckMatchups(playerDeckState, cardMap, comboCatalog = [], runsP
   let totalPlayerWins = 0;
   let totalSimulations = 0;
 
+  const opponentEntries = Object.entries(gauntletToUse);
+  const actualRunsPerMatchup = Math.max(50, Math.floor(1000 / Math.max(1, opponentEntries.length)));
+
   // Run against each opponent in the meta gauntlet
-  for (const [opponentKey, opponentDeck] of Object.entries(META_GAUNTLET_DECKS)) {
+  for (const [opponentKey, opponentDeck] of opponentEntries) {
     const opponentDeckList = [];
     for (const [id, qty] of Object.entries(opponentDeck.mainDeck || {})) {
       const card = getCard(id);
@@ -189,7 +206,7 @@ function simulateDeckMatchups(playerDeckState, cardMap, comboCatalog = [], runsP
     let oWins = 0;
     let totalTurnsAccum = 0;
 
-    for (let run = 0; run < runsPerMatchup; run++) {
+    for (let run = 0; run < actualRunsPerMatchup; run++) {
       totalSimulations++;
       const gameResult = simulateSingleMatch(
         playerDeckState,

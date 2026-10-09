@@ -288,7 +288,7 @@ function generateCardRecommendations(deckState, cardMap, allCards, gaps, activeT
 /**
  * Main Calculation Controller
  */
-function processSynergyEngine(deckState, allCards, combosCatalog = []) {
+function processSynergyEngine(deckState, allCards, combosCatalog = [], customGauntlet = null) {
   const cardMap = new Map();
   allCards.forEach(c => cardMap.set(c.id, c));
 
@@ -328,7 +328,7 @@ function processSynergyEngine(deckState, allCards, combosCatalog = []) {
   let matchupSimulation = null;
   if (typeof simulateDeckMatchups === 'function') {
     try {
-      matchupSimulation = simulateDeckMatchups(deckState, cardMap, combosCatalog || [], 250);
+      matchupSimulation = simulateDeckMatchups(deckState, cardMap, combosCatalog || [], 250, customGauntlet);
     } catch (simErr) {
       console.warn('Matchup simulation error:', simErr);
     }
@@ -363,9 +363,9 @@ const isDedicatedWorker = (typeof WorkerGlobalScope !== 'undefined' && self inst
                           (typeof importScripts === 'function' && typeof window === 'undefined');
 if (isDedicatedWorker && typeof self.postMessage === 'function') {
   self.onmessage = function(e) {
-    const { deckState, allCards, combosCatalog } = e.data;
+    const { deckState, allCards, combosCatalog, customGauntlet } = e.data;
     try {
-      const results = processSynergyEngine(deckState, allCards, combosCatalog);
+      const results = processSynergyEngine(deckState, allCards, combosCatalog, customGauntlet);
       self.postMessage({ success: true, results });
     } catch (err) {
       self.postMessage({ success: false, error: err.message });

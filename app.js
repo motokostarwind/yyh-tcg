@@ -29,8 +29,11 @@ const state = {
     mainDeck: {} // { [cardId]: count }
   },
   
-  savedDecks: []
+  savedDecks: [],
+  metaGauntlet: null,
+  editingGauntletDeckKey: null
 };
+window.state = state;
 
 // Team Bonus Descriptions Dictionary
 const TEAM_BONUSES = {
@@ -81,8 +84,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   await loadCards();
   await loadSavedDecks();
   loadInitialDeck();
+  initMetaGauntlet();
   initSynergyWorker();
   renderDeckBuilder();
+  renderGauntletPills();
 });
 
 // 1. Data Fetching
@@ -1144,30 +1149,44 @@ function computeActiveDeckSynergies(card) {
     }
 
     // 4. Resource / Mechanics Synergies
-    if ((card.seCost >= 3 || (card.attacks || []).some(a => a.damage >= 8000)) &&
-        (partnerCard.strategicRoles?.includes('resource_ramp') || partnerCard.name.includes('Spirit Cuffs') || partnerCard.name.includes('Backyard Dummy'))) {
+    // A) Cards with SE cost >= 3 benefit from real Spirit Energy ramp cards (se_battery)
+    if (card.seCost >= 3 && (partnerCard.strategicRoles?.includes('se_battery') || partnerCard.name.toLowerCase() === 'blade storm')) {
       synergies.push({
         partnerCard,
         synergyType: '⚡ Energy Enabler',
         priority: 60,
-        reason: `${partnerCard.name} banks Spirit Energy, ensuring you can afford ${card.name}'s high-cost abilities.`
+        reason: `${partnerCard.name} accelerates your Spirit Energy pool, ensuring you can afford ${card.name}'s ${card.seCost} SE cost.`
       });
       seenPartnerIds.add(partnerCard.id);
       continue;
     }
 
+    // B) Multi-card attack discard costs benefit from genuine card draw
     if ((card.attacks || []).some(a => a.cost >= 2) &&
-        (partnerCard.strategicRoles?.includes('draw_engine') || partnerCard.name.includes('Kitty Love') || partnerCard.name.includes('Heroic Team'))) {
+        (partnerCard.strategicRoles?.includes('card_draw') || partnerCard.name.includes('Kitty Love') || partnerCard.name.includes('Heroic Team'))) {
       synergies.push({
         partnerCard,
         synergyType: '🃏 Draw Fuel',
         priority: 55,
-        reason: `${partnerCard.name} draws cards to feed ${card.name}'s multi-card attack discard cost.`
+        reason: `${partnerCard.name} provides card draw to pay ${card.name}'s multi-card attack discard cost.`
       });
       seenPartnerIds.add(partnerCard.id);
       continue;
     }
 
+    // C) Physical beatdown / attack pump synergies
+    if ((card.attacks || []).some(a => a.damage >= 5000) && partnerCard.strategicRoles?.includes('atk_pump')) {
+      synergies.push({
+        partnerCard,
+        synergyType: '💥 Attack Booster',
+        priority: 52,
+        reason: `${partnerCard.name} boosts attack values, pushing ${card.name}'s strikes over key opponent defense breakpoints.`
+      });
+      seenPartnerIds.add(partnerCard.id);
+      continue;
+    }
+
+    // D) Technique synergies
     if (card.cardType === 'Technique' && (partnerCard.name.includes('Genkai') || partnerCard.team === 'Team Genkai')) {
       synergies.push({
         partnerCard,
@@ -1203,28 +1222,40 @@ function generateDynamicPartnerAdvice(card) {
   const maxAtkCost = Math.max(0, ...(card.attacks || []).map(a => a.cost || 0));
   const maxAtkDmg = Math.max(0, ...(card.attacks || []).map(a => typeof a.damage === 'number' ? a.damage : 0));
 
-  if (card.seCost >= 3 || maxAtkDmg >= 8000) {
-    const cuffCard = state.cards.find(c => c.name.toLowerCase() === 'spirit cuffs') ||
-                     state.cards.find(c => c.name.toLowerCase() === 'backyard dummy');
-    if (cuffCard) {
+  if (card.seCost >= 3) {
+    const seBattery = state.cards.find(c => (c.strategicRoles || []).includes('se_battery') && (c.team === card.team || c.team === 'None')) ||
+                      state.cards.find(c => (c.strategicRoles || []).includes('se_battery'));
+    if (seBattery) {
       suggestions.push({
         title: 'Spirit Energy Acceleration',
         tag: 'Resource Fuel',
-        partnerCard: cuffCard,
-        why: `Run ${cuffCard.name} to bank Spirit Energy early, guaranteeing reliable turn-to-turn activation for high-cost attacks.`
+        partnerCard: seBattery,
+        why: `With an SE cost of ${card.seCost}, ${card.name} benefits from ${seBattery.name}'s Spirit Energy generation to ensure consistent activation.`
       });
     }
   }
 
   if (maxAtkCost >= 2) {
-    const drawCard = state.cards.find(c => c.name.toLowerCase() === 'kitty love') ||
-                     state.cards.find(c => c.name.toLowerCase() === 'heroic team');
+    const drawCard = state.cards.find(c => (c.strategicRoles || []).includes('card_draw')) ||
+                     state.cards.find(c => c.name.toLowerCase() === 'kitty love');
     if (drawCard) {
       suggestions.push({
         title: 'Hand Size Sustain & Draw',
         tag: 'Discard Fuel',
         partnerCard: drawCard,
         why: `${drawCard.name} maintains healthy hand size to pay ${card.name}'s ${maxAtkCost}-card discard costs without exhausting your options.`
+      });
+    }
+  }
+
+  if (maxAtkDmg >= 6000) {
+    const pumpCard = state.cards.find(c => c.name.toLowerCase() === 'backyard dummy' || (c.strategicRoles || []).includes('atk_pump'));
+    if (pumpCard) {
+      suggestions.push({
+        title: 'Breakpoint KO Push',
+        tag: 'Damage Scaling',
+        partnerCard: pumpCard,
+        why: `${pumpCard.name} boosts attack damage (+2000 ATK), turning ${card.name}'s ${maxAtkDmg} power strike into guaranteed 2-wound KOs against high-DEF fighters.`
       });
     }
   }
@@ -1288,6 +1319,18 @@ function addCardToMainDeck(cardId) {
   const card = state.cardMap.get(cardId);
   if (!card) return;
 
+  // Rule: Cards costing more than 10 Spirit Energy require Blade Storm in the deck
+  if (card.seCost !== null && card.seCost > 10) {
+    const hasBladeStorm = Object.keys(state.currentDeck.mainDeck).some(id => {
+      const c = state.cardMap.get(id);
+      return c && c.name.toLowerCase() === 'blade storm';
+    });
+    if (!hasBladeStorm) {
+      showToast(`⚠️ Cannot add "${card.name}" (SE ${card.seCost}): Cards costing more than 10 Spirit Energy require "Blade Storm" in your deck!`);
+      return;
+    }
+  }
+
   const currentCount = state.currentDeck.mainDeck[cardId] || 0;
   if (currentCount >= card.limitPerDeck) {
     showToast(`Maximum ${card.limitPerDeck} copies of ${card.name} allowed per deck!`);
@@ -1300,7 +1343,19 @@ function addCardToMainDeck(cardId) {
 }
 
 function removeCardFromMainDeck(cardId) {
+  const card = state.cardMap.get(cardId);
   if (state.currentDeck.mainDeck[cardId]) {
+    // If removing Blade Storm, verify if deck has >10 SE cards that would be invalidated
+    if (card && card.name.toLowerCase() === 'blade storm' && state.currentDeck.mainDeck[cardId] === 1) {
+      const hasHighSECards = Object.keys(state.currentDeck.mainDeck).some(id => {
+        const c = state.cardMap.get(id);
+        return c && c.seCost !== null && c.seCost > 10;
+      });
+      if (hasHighSECards) {
+        showToast('⚠️ Cannot remove Blade Storm while cards costing >10 Spirit Energy remain in your deck! Remove those cards first.');
+        return;
+      }
+    }
     state.currentDeck.mainDeck[cardId]--;
     if (state.currentDeck.mainDeck[cardId] <= 0) {
       delete state.currentDeck.mainDeck[cardId];
@@ -1310,6 +1365,17 @@ function removeCardFromMainDeck(cardId) {
 }
 
 function deleteCardFromMainDeck(cardId) {
+  const card = state.cardMap.get(cardId);
+  if (card && card.name.toLowerCase() === 'blade storm') {
+    const hasHighSECards = Object.keys(state.currentDeck.mainDeck).some(id => {
+      const c = state.cardMap.get(id);
+      return c && c.seCost !== null && c.seCost > 10;
+    });
+    if (hasHighSECards) {
+      showToast('⚠️ Cannot remove Blade Storm while cards costing >10 Spirit Energy remain in your deck! Remove those cards first.');
+      return;
+    }
+  }
   delete state.currentDeck.mainDeck[cardId];
   updateDeckState();
 }
@@ -1427,7 +1493,17 @@ function renderDeckBuilder() {
     }
   }
 
-  const isDeckLegal = has4Chars && hasUniqueChars && hasMinMain && hasMinTotal && copyLimitsRespected;
+  const hasHighSECards = Object.keys(state.currentDeck.mainDeck).some(id => {
+    const card = state.cardMap.get(id);
+    return card && card.seCost !== null && card.seCost > 10;
+  });
+  const hasBladeStorm = Object.keys(state.currentDeck.mainDeck).some(id => {
+    const card = state.cardMap.get(id);
+    return card && card.name.toLowerCase() === 'blade storm';
+  });
+  const bladeStormRequirementMet = !hasHighSECards || hasBladeStorm;
+
+  const isDeckLegal = has4Chars && hasUniqueChars && hasMinMain && hasMinTotal && copyLimitsRespected && bladeStormRequirementMet;
 
   // Validation Checklist UI
   setCheckItem('checkStartingChars', has4Chars, '4 Starting Characters placed');
@@ -1435,6 +1511,7 @@ function renderDeckBuilder() {
   setCheckItem('checkMainDeckSize', hasMinMain, 'Minimum 40 Main Deck cards');
   setCheckItem('checkTotalDeckSize', hasMinTotal, 'Minimum 44 Total cards');
   setCheckItem('checkCopyLimits', copyLimitsRespected, 'Copy limits respected (max 3, Limit 1 respected)');
+  setCheckItem('checkBladeStorm', bladeStormRequirementMet, bladeStormRequirementMet ? '>10 SE cards require Blade Storm' : '>10 SE cards require Blade Storm (Missing!)');
 
   const badge = document.getElementById('deckLegalBadge');
   if (isDeckLegal) {
@@ -1747,16 +1824,18 @@ function runSynergyCalculation() {
     mainDeck: { ...state.currentDeck.mainDeck },
     activeTeamBonus: activeBonusTeam
   };
+  const activeGauntlet = (typeof getMetaGauntletForSimulation === 'function') ? getMetaGauntletForSimulation() : null;
 
   if (synergyWorker) {
     synergyWorker.postMessage({
       deckState: deckPayload,
       allCards: state.cards,
-      combosCatalog: state.combos || []
+      combosCatalog: state.combos || [],
+      customGauntlet: activeGauntlet
     });
   } else if (typeof processSynergyEngine === 'function') {
     try {
-      const results = processSynergyEngine(deckPayload, state.cards, state.combos || []);
+      const results = processSynergyEngine(deckPayload, state.cards, state.combos || [], activeGauntlet);
       renderSynergyAnalytics(results);
     } catch (err) {
       console.error('Direct synergy evaluation error:', err);
@@ -2197,6 +2276,44 @@ function setupDeckActions() {
 
   // Export / Import Modals
   setupExportModal();
+
+  // Meta Gauntlet Manager
+  const btnManageGauntlet = document.getElementById('btnManageGauntlet');
+  if (btnManageGauntlet) btnManageGauntlet.addEventListener('click', openGauntletModal);
+
+  const gauntletModalClose = document.getElementById('gauntletModalClose');
+  if (gauntletModalClose) gauntletModalClose.addEventListener('click', closeGauntletModal);
+
+  const btnApplyGauntletClose = document.getElementById('btnApplyGauntletClose');
+  if (btnApplyGauntletClose) btnApplyGauntletClose.addEventListener('click', closeGauntletModal);
+
+  const gauntletModal = document.getElementById('gauntletModal');
+  if (gauntletModal) {
+    gauntletModal.addEventListener('click', (e) => {
+      if (e.target === gauntletModal) closeGauntletModal();
+    });
+  }
+
+  const btnResetGauntlet = document.getElementById('btnResetGauntletDefaults');
+  if (btnResetGauntlet) btnResetGauntlet.addEventListener('click', resetGauntletToDefaults);
+
+  const btnAddNewGauntlet = document.getElementById('btnAddNewGauntletDeck');
+  if (btnAddNewGauntlet) btnAddNewGauntlet.addEventListener('click', () => openGauntletDeckEditor(null));
+
+  const btnImportSaved = document.getElementById('btnImportSavedToGauntlet');
+  if (btnImportSaved) btnImportSaved.addEventListener('click', importSavedDeckToGauntlet);
+
+  const btnCloseEditor = document.getElementById('btnCloseGauntletEditor');
+  if (btnCloseEditor) btnCloseEditor.addEventListener('click', closeGauntletDeckEditor);
+
+  const btnCancelEditor = document.getElementById('btnCancelGauntletEdit');
+  if (btnCancelEditor) btnCancelEditor.addEventListener('click', closeGauntletDeckEditor);
+
+  const btnSaveEditor = document.getElementById('btnSaveGauntletDeck');
+  if (btnSaveEditor) btnSaveEditor.addEventListener('click', saveGauntletDeckFromEditor);
+
+  const btnQuickAdd = document.getElementById('btnGauntletQuickAdd');
+  if (btnQuickAdd) btnQuickAdd.addEventListener('click', handleGauntletQuickAdd);
 }
 
 async function saveDeck() {
@@ -2590,4 +2707,554 @@ function showToast(msg) {
   toast._timeout = setTimeout(() => {
     toast.style.display = 'none';
   }, 2400);
+}
+
+// ==========================================================================
+// 12. Meta Gauntlet Manager & Selector
+// ==========================================================================
+
+let editingGauntletDeckKey = null;
+let editingGauntletDeckData = null;
+
+function initMetaGauntlet() {
+  const saved = localStorage.getItem('yyh_meta_gauntlet');
+  if (saved) {
+    try {
+      state.metaGauntlet = JSON.parse(saved);
+      for (const k of Object.keys(state.metaGauntlet)) {
+        if (state.metaGauntlet[k].enabled === undefined) {
+          state.metaGauntlet[k].enabled = true;
+        }
+      }
+      return;
+    } catch (e) {
+      console.warn('Failed parsing saved meta gauntlet, reverting to default:', e);
+    }
+  }
+
+  if (typeof META_GAUNTLET_DECKS !== 'undefined') {
+    state.metaGauntlet = JSON.parse(JSON.stringify(META_GAUNTLET_DECKS));
+  } else {
+    state.metaGauntlet = {};
+  }
+  for (const k of Object.keys(state.metaGauntlet)) {
+    state.metaGauntlet[k].enabled = true;
+  }
+  localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+}
+
+function getMetaGauntletForSimulation() {
+  if (!state.metaGauntlet) {
+    initMetaGauntlet();
+  }
+  const enabledDecks = {};
+  for (const [key, deck] of Object.entries(state.metaGauntlet || {})) {
+    if (deck && deck.enabled !== false) {
+      enabledDecks[key] = deck;
+    }
+  }
+  if (Object.keys(enabledDecks).length === 0) {
+    return state.metaGauntlet;
+  }
+  return enabledDecks;
+}
+
+function renderGauntletPills() {
+  const container = document.getElementById('gauntletPillsList');
+  if (!container) return;
+  if (!state.metaGauntlet) initMetaGauntlet();
+
+  container.innerHTML = '';
+  const entries = Object.entries(state.metaGauntlet || {});
+  if (entries.length === 0) {
+    container.innerHTML = '<span class="text-dim" style="font-size:0.75rem;">No opponents configured</span>';
+    return;
+  }
+
+  entries.forEach(([key, deck]) => {
+    const isEnabled = deck.enabled !== false;
+    const pill = document.createElement('button');
+    pill.type = 'button';
+    pill.className = `gauntlet-pill ${isEnabled ? 'active' : 'inactive'}`;
+    pill.title = isEnabled ? `Click to exclude "${deck.name}" from simulation` : `Click to include "${deck.name}" in simulation`;
+    pill.innerHTML = `
+      <span class="gauntlet-pill-icon">${deck.icon || '⚔️'}</span>
+      <span class="gauntlet-pill-name">${deck.name.replace(/^Team\s+/i, '')}</span>
+      <span class="gauntlet-pill-check">${isEnabled ? '✓' : '✗'}</span>
+    `;
+
+    pill.addEventListener('click', () => {
+      const activeCount = Object.values(state.metaGauntlet).filter(d => d.enabled !== false).length;
+      if (isEnabled && activeCount <= 1) {
+        showToast('⚠️ At least one opponent deck must be active for simulations!');
+        return;
+      }
+      deck.enabled = !isEnabled;
+      localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+      renderGauntletPills();
+      runSynergyCalculation();
+      showToast(`${deck.name} ${deck.enabled ? 'enabled' : 'disabled'} for simulations.`);
+    });
+
+    container.appendChild(pill);
+  });
+}
+
+function openGauntletModal() {
+  const modal = document.getElementById('gauntletModal');
+  if (!modal) return;
+  if (!state.metaGauntlet) initMetaGauntlet();
+
+  const savedSelect = document.getElementById('selectSavedDeckToImport');
+  if (savedSelect) {
+    savedSelect.innerHTML = '';
+    const savedDecks = (state.savedDecks && state.savedDecks.length > 0)
+      ? state.savedDecks
+      : JSON.parse(localStorage.getItem('yyh_saved_decks') || '[]');
+
+    if (savedDecks.length === 0) {
+      const opt = document.createElement('option');
+      opt.value = '';
+      opt.textContent = '-- No saved decks found (save decks in Deck Builder first) --';
+      opt.disabled = true;
+      savedSelect.appendChild(opt);
+    } else {
+      savedDecks.forEach(d => {
+        const opt = document.createElement('option');
+        opt.value = d.id;
+        const count = Object.values(d.mainDeck || {}).reduce((a, b) => a + b, 0);
+        opt.textContent = `${d.name} (${count} cards)`;
+        savedSelect.appendChild(opt);
+      });
+    }
+  }
+
+  closeGauntletDeckEditor();
+  renderGauntletModalDecks();
+  modal.style.display = 'flex';
+}
+
+function closeGauntletModal() {
+  const modal = document.getElementById('gauntletModal');
+  if (modal) modal.style.display = 'none';
+  closeGauntletDeckEditor();
+  renderGauntletPills();
+  runSynergyCalculation();
+}
+
+function renderGauntletModalDecks() {
+  const listEl = document.getElementById('gauntletDecksList');
+  if (!listEl) return;
+  listEl.innerHTML = '';
+
+  const entries = Object.entries(state.metaGauntlet || {});
+  if (entries.length === 0) {
+    listEl.innerHTML = '<div style="color:var(--text-dim); text-align:center; padding:16px;">No opponent decks in gauntlet. Click "Reset Defaults" or "+ New Opponent".</div>';
+    return;
+  }
+
+  entries.forEach(([key, deck]) => {
+    const card = document.createElement('div');
+    const isEnabled = deck.enabled !== false;
+    card.className = `gauntlet-deck-card ${isEnabled ? '' : 'disabled'}`;
+
+    const mainCount = Object.values(deck.mainDeck || {}).reduce((a, b) => a + b, 0);
+
+    let slotsHtml = '';
+    for (let s = 1; s <= 4; s++) {
+      const charId = deck.slots ? deck.slots[s] : null;
+      const charCard = charId ? state.cardMap.get(charId) : null;
+      if (charCard && charCard.imageUrl) {
+        slotsHtml += `<img class="gauntlet-slot-mini" src="${charCard.imageUrl}" alt="${charCard.name}" title="${charCard.name} (Slot ${s})">`;
+      } else if (charCard) {
+        slotsHtml += `<div class="gauntlet-slot-mini" style="background:#1e293b; display:flex; align-items:center; justify-content:center; font-size:9px; color:#fff;" title="${charCard.name}">#${s}</div>`;
+      } else {
+        slotsHtml += `<div class="gauntlet-slot-mini" style="background:#0f172a; border:1px dashed #475569;" title="Slot ${s} Empty"></div>`;
+      }
+    }
+
+    card.innerHTML = `
+      <div class="gauntlet-deck-left">
+        <input type="checkbox" class="gauntlet-toggle-check" ${isEnabled ? 'checked' : ''} title="Include this opponent in simulations">
+        <div class="gauntlet-deck-info">
+          <div class="gauntlet-deck-title-row">
+            <span class="gauntlet-deck-icon">${deck.icon || '⚔️'}</span>
+            <span class="gauntlet-deck-title">${deck.name}</span>
+            <span class="gauntlet-deck-tag">${deck.team || 'No Team'}</span>
+          </div>
+          <div class="gauntlet-deck-sub">
+            <span>Main: <strong>${mainCount}</strong> cards</span>
+            <div class="gauntlet-slots-preview">${slotsHtml}</div>
+          </div>
+        </div>
+      </div>
+      <div class="gauntlet-deck-actions">
+        <button class="btn btn-secondary btn-sm btn-edit-gauntlet" title="Edit this opponent deck">✏️ Edit</button>
+        <button class="btn btn-secondary btn-sm btn-del-gauntlet" title="Delete opponent from gauntlet" style="color:#ef4444;">🗑️</button>
+      </div>
+    `;
+
+    const checkbox = card.querySelector('.gauntlet-toggle-check');
+    checkbox.onchange = () => {
+      const activeCount = Object.values(state.metaGauntlet).filter(d => d.enabled !== false).length;
+      if (isEnabled && activeCount <= 1 && !checkbox.checked) {
+        checkbox.checked = true;
+        showToast('⚠️ At least one opponent must remain enabled for simulations!');
+        return;
+      }
+      deck.enabled = checkbox.checked;
+      card.classList.toggle('disabled', !deck.enabled);
+      localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+      renderGauntletPills();
+      runSynergyCalculation();
+    };
+
+    card.querySelector('.btn-edit-gauntlet').onclick = () => {
+      openGauntletDeckEditor(key);
+    };
+
+    card.querySelector('.btn-del-gauntlet').onclick = () => {
+      if (Object.keys(state.metaGauntlet).length <= 1) {
+        showToast('⚠️ Cannot delete the last opponent deck!');
+        return;
+      }
+      if (confirm(`Remove opponent "${deck.name}" from the Meta Gauntlet?`)) {
+        delete state.metaGauntlet[key];
+        localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+        renderGauntletModalDecks();
+        renderGauntletPills();
+        runSynergyCalculation();
+        showToast(`Removed "${deck.name}".`);
+      }
+    };
+
+    listEl.appendChild(card);
+  });
+}
+
+function openGauntletDeckEditor(deckKey = null) {
+  editingGauntletDeckKey = deckKey;
+  const panel = document.getElementById('gauntletDeckEditorPanel');
+  if (!panel) return;
+
+  if (deckKey && state.metaGauntlet[deckKey]) {
+    editingGauntletDeckData = JSON.parse(JSON.stringify(state.metaGauntlet[deckKey]));
+    document.getElementById('gauntletEditorTitle').textContent = `✏️ Edit Opponent: ${editingGauntletDeckData.name}`;
+  } else {
+    editingGauntletDeckData = {
+      name: 'Custom Opponent Deck',
+      team: 'None',
+      icon: '⚔️',
+      slots: { 1: null, 2: null, 3: null, 4: null },
+      mainDeck: {},
+      enabled: true
+    };
+    document.getElementById('gauntletEditorTitle').textContent = '⚔️ Create New Opponent Deck';
+  }
+
+  document.getElementById('gauntletEditName').value = editingGauntletDeckData.name || '';
+  document.getElementById('gauntletEditIcon').value = editingGauntletDeckData.icon || '⚔️';
+
+  const teamSelect = document.getElementById('gauntletEditTeam');
+  if (teamSelect) {
+    teamSelect.innerHTML = '';
+    const teams = ['None', 'Team Urameshi', 'Team Toguro', 'Team Genkai', 'Team Masho', 'Team Saint Beasts', 'Team Uraotogi', 'Team Rokuyukai'];
+    teams.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = t;
+      opt.textContent = t;
+      if (editingGauntletDeckData.team === t) opt.selected = true;
+      teamSelect.appendChild(opt);
+    });
+  }
+
+  populateGauntletQuickAddSelect();
+  renderGauntletEditorSlots();
+  renderGauntletEditorCards();
+
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function closeGauntletDeckEditor() {
+  const panel = document.getElementById('gauntletDeckEditorPanel');
+  if (panel) panel.style.display = 'none';
+  editingGauntletDeckKey = null;
+  editingGauntletDeckData = null;
+}
+
+function renderGauntletEditorSlots() {
+  const grid = document.getElementById('gauntletEditorSlotsGrid');
+  if (!grid || !editingGauntletDeckData) return;
+  grid.innerHTML = '';
+
+  const charCards = (state.cards || []).filter(c => c.cardType === 'Character');
+  charCards.sort((a, b) => a.name.localeCompare(b.name));
+
+  for (let s = 1; s <= 4; s++) {
+    const currentCardId = editingGauntletDeckData.slots ? editingGauntletDeckData.slots[s] : null;
+    const currentCard = currentCardId ? state.cardMap.get(currentCardId) : null;
+
+    const slotBox = document.createElement('div');
+    slotBox.className = 'editor-slot-item';
+    slotBox.style.cssText = 'background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px;';
+
+    slotBox.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.75rem; font-weight:700; color:var(--spirit-cyan);">
+        <span>Slot ${s} Fighter</span>
+        ${currentCard ? `<span style="color:var(--text-dim); font-size:0.7rem;">DEF: ${currentCard.defense || 4000}</span>` : ''}
+      </div>
+      <select class="form-select slot-char-select" style="font-size:0.78rem; padding:4px 6px;">
+        <option value="">-- Choose Character --</option>
+      </select>
+    `;
+
+    const select = slotBox.querySelector('.slot-char-select');
+    charCards.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = `${c.name} (${c.cardNumber}) [${c.team || 'No Team'}]`;
+      if (c.id === currentCardId) opt.selected = true;
+      select.appendChild(opt);
+    });
+
+    select.onchange = (e) => {
+      if (!editingGauntletDeckData.slots) editingGauntletDeckData.slots = {};
+      editingGauntletDeckData.slots[s] = e.target.value || null;
+      renderGauntletEditorSlots();
+    };
+
+    grid.appendChild(slotBox);
+  }
+}
+
+function populateGauntletQuickAddSelect() {
+  const select = document.getElementById('gauntletQuickAddCardSelect');
+  if (!select) return;
+  select.innerHTML = '<option value="">-- Select card to add --</option>';
+
+  const sorted = [...(state.cards || [])].sort((a, b) => a.name.localeCompare(b.name));
+  sorted.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = `[${c.cardType}] ${c.name} (${c.cardNumber})`;
+    select.appendChild(opt);
+  });
+}
+
+function renderGauntletEditorCards() {
+  const container = document.getElementById('gauntletEditorCardsList');
+  const countEl = document.getElementById('gauntletEditorCardCount');
+  if (!container || !editingGauntletDeckData) return;
+
+  container.innerHTML = '';
+  const entries = Object.entries(editingGauntletDeckData.mainDeck || {});
+  const totalCount = entries.reduce((sum, [, qty]) => sum + qty, 0);
+  if (countEl) countEl.textContent = totalCount;
+
+  if (entries.length === 0) {
+    container.innerHTML = '<div style="color:var(--text-dim); font-size:0.78rem; text-align:center; padding:12px;">No cards in main deck. Use the quick add dropdown above to add cards.</div>';
+    return;
+  }
+
+  const resolved = entries.map(([id, qty]) => ({
+    id,
+    qty,
+    card: state.cardMap.get(id)
+  })).filter(x => x.card);
+
+  resolved.sort((a, b) => a.card.name.localeCompare(b.card.name));
+
+  resolved.forEach(({ id, qty, card }) => {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:rgba(15, 23, 42, 0.6); border-bottom:1px solid rgba(255, 255, 255, 0.05); font-size:0.8rem;';
+
+    row.innerHTML = `
+      <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+        <span style="font-size:0.7rem; color:var(--spirit-cyan); font-weight:700;">[${card.cardType}]</span>
+        <span style="color:#fff; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${card.name}</span>
+        <span style="font-size:0.7rem; color:var(--text-dim);">${card.cardNumber}</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px; flex-shrink:0;">
+        <button class="btn btn-secondary btn-sm btn-qty-minus" style="padding:2px 8px; font-weight:bold;">-</button>
+        <span style="min-width:20px; text-align:center; font-weight:700; color:#fff;">${qty}</span>
+        <button class="btn btn-secondary btn-sm btn-qty-plus" style="padding:2px 8px; font-weight:bold;">+</button>
+        <button class="btn btn-secondary btn-sm btn-qty-del" style="padding:2px 6px; color:#ef4444;" title="Remove card">✕</button>
+      </div>
+    `;
+
+    row.querySelector('.btn-qty-minus').onclick = () => {
+      if (editingGauntletDeckData.mainDeck[id] > 1) {
+        editingGauntletDeckData.mainDeck[id]--;
+      } else {
+        delete editingGauntletDeckData.mainDeck[id];
+      }
+      renderGauntletEditorCards();
+    };
+
+    row.querySelector('.btn-qty-plus').onclick = () => {
+      const limit = card.limitPerDeck || 3;
+      if (editingGauntletDeckData.mainDeck[id] < limit) {
+        editingGauntletDeckData.mainDeck[id]++;
+        renderGauntletEditorCards();
+      } else {
+        showToast(`Maximum ${limit} copies of ${card.name} allowed!`);
+      }
+    };
+
+    row.querySelector('.btn-qty-del').onclick = () => {
+      delete editingGauntletDeckData.mainDeck[id];
+      renderGauntletEditorCards();
+    };
+
+    container.appendChild(row);
+  });
+}
+
+function handleGauntletQuickAdd() {
+  const select = document.getElementById('gauntletQuickAddCardSelect');
+  if (!select || !select.value || !editingGauntletDeckData) return;
+  const cardId = select.value;
+  const card = state.cardMap.get(cardId);
+  if (!card) return;
+
+  if (!editingGauntletDeckData.mainDeck) editingGauntletDeckData.mainDeck = {};
+  const current = editingGauntletDeckData.mainDeck[cardId] || 0;
+  const limit = card.limitPerDeck || 3;
+
+  if (current >= limit) {
+    showToast(`Maximum ${limit} copies of ${card.name} already in deck!`);
+    return;
+  }
+
+  editingGauntletDeckData.mainDeck[cardId] = current + 1;
+  renderGauntletEditorCards();
+  showToast(`Added ${card.name} to opponent deck.`);
+}
+
+function saveGauntletDeckFromEditor() {
+  if (!editingGauntletDeckData) return;
+
+  const nameInput = document.getElementById('gauntletEditName');
+  const teamInput = document.getElementById('gauntletEditTeam');
+  const iconInput = document.getElementById('gauntletEditIcon');
+
+  const deckName = nameInput ? nameInput.value.trim() : '';
+  if (!deckName) {
+    showToast('⚠️ Please enter a deck name!');
+    return;
+  }
+
+  editingGauntletDeckData.name = deckName;
+  editingGauntletDeckData.team = teamInput ? teamInput.value : 'None';
+  editingGauntletDeckData.icon = (iconInput && iconInput.value.trim()) ? iconInput.value.trim() : '⚔️';
+
+  const slots = editingGauntletDeckData.slots || {};
+  const filledSlots = [slots[1], slots[2], slots[3], slots[4]].filter(Boolean);
+  if (filledSlots.length < 4) {
+    if (!confirm('⚠️ This opponent deck has fewer than 4 starting fighters selected. Continue saving anyway?')) {
+      return;
+    }
+  }
+
+  const mainCount = Object.values(editingGauntletDeckData.mainDeck || {}).reduce((a, b) => a + b, 0);
+  if (mainCount === 0) {
+    if (!confirm('⚠️ This opponent deck has 0 cards in its main deck. Continue saving anyway?')) {
+      return;
+    }
+  }
+
+  let targetKey = editingGauntletDeckKey;
+  if (!targetKey) {
+    targetKey = 'deck_' + Date.now();
+  }
+
+  state.metaGauntlet[targetKey] = {
+    ...editingGauntletDeckData,
+    enabled: true
+  };
+
+  localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+  closeGauntletDeckEditor();
+  renderGauntletModalDecks();
+  renderGauntletPills();
+  runSynergyCalculation();
+  showToast(`Saved opponent deck "${deckName}"!`);
+}
+
+function importSavedDeckToGauntlet() {
+  const select = document.getElementById('selectSavedDeckToImport');
+  if (!select || !select.value) {
+    showToast('⚠️ Please select a saved deck to import!');
+    return;
+  }
+  const deckId = select.value;
+  const savedDecks = (state.savedDecks && state.savedDecks.length > 0)
+    ? state.savedDecks
+    : JSON.parse(localStorage.getItem('yyh_saved_decks') || '[]');
+
+  const deck = savedDecks.find(d => d.id === deckId);
+  if (!deck) {
+    showToast('⚠️ Could not find selected deck.');
+    return;
+  }
+
+  const newKey = 'imported_' + Date.now();
+  let detectedTeam = 'None';
+  if (deck.slots) {
+    const chars = Object.values(deck.slots).filter(Boolean).map(id => state.cardMap.get(id)).filter(Boolean);
+    const teamCounts = {};
+    chars.forEach(c => {
+      if (c.team && c.team !== 'None') {
+        teamCounts[c.team] = (teamCounts[c.team] || 0) + 1;
+      }
+    });
+    const sorted = Object.entries(teamCounts).sort((a, b) => b[1] - a[1]);
+    if (sorted.length > 0 && sorted[0][1] >= 2) {
+      detectedTeam = sorted[0][0];
+    }
+  }
+
+  const iconMap = {
+    'Team Toguro': '💪',
+    'Team Urameshi': '⚡',
+    'Team Genkai': '🥋',
+    'Team Masho': '🥷',
+    'Team Saint Beasts': '🐉',
+    'Team Uraotogi': '🎭',
+    'Team Rokuyukai': '🔥'
+  };
+
+  state.metaGauntlet[newKey] = {
+    name: deck.name || 'Imported Opponent',
+    team: detectedTeam,
+    icon: iconMap[detectedTeam] || '⚔️',
+    slots: { ...(deck.slots || { 1: null, 2: null, 3: null, 4: null }) },
+    mainDeck: { ...(deck.mainDeck || {}) },
+    enabled: true
+  };
+
+  localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+  renderGauntletModalDecks();
+  renderGauntletPills();
+  runSynergyCalculation();
+  showToast(`Successfully imported "${deck.name}" into Meta Gauntlet!`);
+}
+
+function resetGauntletToDefaults() {
+  if (confirm('Reset the Meta Gauntlet to default Score tournament benchmark decks? Any custom decks will be replaced.')) {
+    if (typeof META_GAUNTLET_DECKS !== 'undefined') {
+      state.metaGauntlet = JSON.parse(JSON.stringify(META_GAUNTLET_DECKS));
+    } else {
+      state.metaGauntlet = {};
+    }
+    for (const k of Object.keys(state.metaGauntlet)) {
+      state.metaGauntlet[k].enabled = true;
+    }
+    localStorage.setItem('yyh_meta_gauntlet', JSON.stringify(state.metaGauntlet));
+    renderGauntletModalDecks();
+    renderGauntletPills();
+    runSynergyCalculation();
+    showToast('Meta Gauntlet reset to defaults.');
+  }
 }

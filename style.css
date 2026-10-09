@@ -4068,3 +4068,394 @@ body {
   padding: 8px 0;
 }
 
+/* ==========================================================================
+   Meta Gauntlet Selector & Manager Styles
+   ========================================================================== */
+.sim-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.sim-gauntlet-selector-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+}
+
+.gauntlet-selector-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.gauntlet-pills-list {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.gauntlet-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-color);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+}
+
+.gauntlet-pill:hover {
+  border-color: rgba(0, 242, 254, 0.5);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.gauntlet-pill.active {
+  background: rgba(0, 242, 254, 0.15);
+  border-color: var(--spirit-cyan);
+  color: #fff;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(0, 242, 254, 0.25);
+}
+
+.gauntlet-pill-check {
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: var(--spirit-cyan);
+}
+
+.gauntlet-pill:not(.active) .gauntlet-pill-check {
+  color: var(--text-dim);
+  opacity: 0.4;
+}
+
+/* Gauntlet Manager Modal */
+.gauntlet-modal-dialog {
+  max-width: 860px;
+  width: 95%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: #0b1120;
+  border: 1px solid rgba(0, 242, 254, 0.35);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 242, 254, 0.2);
+}
+
+.gauntlet-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.gauntlet-modal-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 4px;
+}
+
+.gauntlet-modal-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.gauntlet-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.gauntlet-import-box {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.import-lead-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.import-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 500px;
+}
+
+.gauntlet-decks-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.gauntlet-deck-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  transition: all 0.2s ease;
+}
+
+.gauntlet-deck-card:hover {
+  border-color: rgba(0, 242, 254, 0.4);
+  background: rgba(15, 23, 42, 0.9);
+}
+
+.gauntlet-deck-card.disabled {
+  opacity: 0.55;
+}
+
+.gauntlet-deck-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.gauntlet-toggle-check {
+  cursor: pointer;
+  width: 18px;
+  height: 18px;
+  accent-color: var(--spirit-cyan);
+}
+
+.gauntlet-deck-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.gauntlet-deck-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gauntlet-deck-icon {
+  font-size: 1.1rem;
+}
+
+.gauntlet-deck-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.gauntlet-deck-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--spirit-cyan);
+  background: rgba(0, 242, 254, 0.1);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(0, 242, 254, 0.25);
+}
+
+.gauntlet-deck-sub {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gauntlet-slots-preview {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gauntlet-slot-mini {
+  width: 22px;
+  height: 30px;
+  object-fit: cover;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.gauntlet-deck-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+/* Gauntlet Deck Editor Panel */
+.gauntlet-deck-editor-panel {
+  background: rgba(10, 16, 30, 0.98);
+  border: 1px solid var(--spirit-cyan);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.editor-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.editor-panel-header h3 {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  color: #fff;
+  margin: 0;
+}
+
+.editor-fields-grid {
+  display: grid;
+  grid-template-columns: 2fr 1.5fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.editor-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.editor-field-group label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+}
+
+.editor-sub-heading {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #fff;
+  display: block;
+  margin-bottom: 8px;
+}
+
+.editor-slots-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.editor-slot-item {
+  background: var(--bg-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.editor-slot-num {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--spirit-cyan);
+}
+
+.editor-main-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.quick-add-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1;
+  max-width: 440px;
+}
+
+.editor-cards-scroll {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  background: rgba(0, 0, 0, 0.3);
+  padding: 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
+.editor-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 8px;
+  background: var(--bg-dark);
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.editor-card-name {
+  font-size: 0.78rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.editor-panel-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-color);
+}
+

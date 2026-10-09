@@ -428,6 +428,9 @@
                   <li id="checkCopyLimits" class="check-item check-pass">
                     <span class="check-icon">✓</span> Copy limits respected (max 3, Limit 1 respected)
                   </li>
+                  <li id="checkBladeStorm" class="check-item check-pass">
+                    <span class="check-icon">✓</span> >10 SE cards require Blade Storm
+                  </li>
                 </ul>
               </div>
 
@@ -503,7 +506,18 @@
                     <h4>⚔️ Matchup Simulation & Combo Synergy Discovery</h4>
                     <span class="header-sub">Simulates matches against Meta Gauntlet to identify top combos & pairings</span>
                   </div>
-                  <button class="btn btn-primary btn-sm" id="btnRunSimulation">⚔️ Run 1,000 Matches</button>
+                  <div class="sim-header-actions">
+                    <button class="btn btn-secondary btn-sm" id="btnManageGauntlet" title="Choose and customize opponent decks in the Meta Gauntlet">⚙️ Edit Gauntlet</button>
+                    <button class="btn btn-primary btn-sm" id="btnRunSimulation">⚔️ Run Matches</button>
+                  </div>
+                </div>
+
+                <!-- Interactive Gauntlet Opponents Chooser -->
+                <div class="sim-gauntlet-selector-row" id="simGauntletSelectorRow">
+                  <span class="gauntlet-selector-label">Opponents:</span>
+                  <div class="gauntlet-pills-list" id="gauntletPillsList">
+                    <!-- Populated dynamically with toggleable opponent pills -->
+                  </div>
                 </div>
                 
                 <div class="sim-overall-score-row" id="simOverallScoreRow">
@@ -751,6 +765,90 @@
             <button class="btn btn-secondary" id="btnCopyExport">Copy to Clipboard</button>
             <button class="btn btn-primary" id="btnDownloadExport">Download File</button>
             <button class="btn btn-primary" id="btnApplyImport" style="display: none;">Load Deck</button>
+          </div>
+        </div>
+      </div>
+    <!-- ================= META GAUNTLET MANAGER MODAL ================= -->
+    <div id="gauntletModal" class="modal-overlay" style="display: none;">
+      <div class="modal-dialog gauntlet-modal-dialog">
+        <button class="modal-close-btn" id="gauntletModalClose">✕</button>
+        <div class="gauntlet-modal-content">
+          <div class="gauntlet-modal-header">
+            <div>
+              <h2 class="gauntlet-modal-title">⚙️ Meta Gauntlet Manager</h2>
+              <p class="gauntlet-modal-subtitle">Choose which decks you face in simulations, edit their decklists, or import custom opponent decks from your saved collections.</p>
+            </div>
+            <div class="gauntlet-header-actions">
+              <button class="btn btn-secondary btn-sm" id="btnResetGauntletDefaults" title="Restore original 4 default Score tournament decks">↺ Reset Defaults</button>
+              <button class="btn btn-primary btn-sm" id="btnAddNewGauntletDeck">➕ New Opponent</button>
+            </div>
+          </div>
+
+          <!-- Quick Import from Saved Decks -->
+          <div class="gauntlet-import-box">
+            <span class="import-lead-label">📥 Import Opponent from Saved Decks:</span>
+            <div class="import-controls-row">
+              <select id="selectSavedDeckToImport" class="form-select"></select>
+              <button class="btn btn-primary btn-sm" id="btnImportSavedToGauntlet">Import into Gauntlet</button>
+            </div>
+          </div>
+
+          <!-- Decks in Gauntlet List -->
+          <div class="gauntlet-decks-list" id="gauntletDecksList">
+            <!-- Rendered dynamically -->
+          </div>
+
+          <!-- Inline Deck Editor Drawer / Panel (hidden by default) -->
+          <div id="gauntletDeckEditorPanel" class="gauntlet-deck-editor-panel" style="display: none;">
+            <div class="editor-panel-header">
+              <h3 id="gauntletEditorTitle">Edit Opponent Deck</h3>
+              <button class="btn btn-secondary btn-sm" id="btnCloseGauntletEditor">Cancel</button>
+            </div>
+            <div class="editor-fields-grid">
+              <div class="editor-field-group">
+                <label>Deck Name</label>
+                <input type="text" id="gauntletEditName" class="form-input" placeholder="e.g. Toguro Beatdown">
+              </div>
+              <div class="editor-field-group">
+                <label>Team</label>
+                <select id="gauntletEditTeam" class="form-select"></select>
+              </div>
+              <div class="editor-field-group">
+                <label>Icon</label>
+                <input type="text" id="gauntletEditIcon" class="form-input" style="max-width: 80px;" placeholder="💪">
+              </div>
+            </div>
+
+            <!-- 4 Starting Characters Picker -->
+            <div class="editor-slots-block">
+              <span class="editor-sub-heading">4 Starting Characters (Required)</span>
+              <div class="editor-slots-grid" id="gauntletEditorSlotsGrid">
+                <!-- 4 Slot selector boxes -->
+              </div>
+            </div>
+
+            <!-- Main Deck Card List & Quick Add -->
+            <div class="editor-main-deck-block">
+              <div class="editor-main-header">
+                <span class="editor-sub-heading">Main Deck Cards (<span id="gauntletEditorCardCount">0</span> cards)</span>
+                <div class="quick-add-row">
+                  <select id="gauntletQuickAddCardSelect" class="form-select"></select>
+                  <button class="btn btn-primary btn-sm" id="btnGauntletQuickAdd">+ Add Card</button>
+                </div>
+              </div>
+              <div class="editor-cards-scroll" id="gauntletEditorCardsList">
+                <!-- Main deck rows with qty steppers and remove -->
+              </div>
+            </div>
+
+            <div class="editor-panel-footer">
+              <button class="btn btn-secondary" id="btnCancelGauntletEdit">Cancel</button>
+              <button class="btn btn-primary" id="btnSaveGauntletDeck">Save Opponent Deck</button>
+            </div>
+          </div>
+
+          <div class="gauntlet-modal-footer">
+            <button class="btn btn-primary" id="btnApplyGauntletClose">Done</button>
           </div>
         </div>
       </div>
