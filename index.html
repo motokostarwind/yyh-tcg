@@ -627,6 +627,90 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Set Composition & Power Scaling (Packaging Color Palette) -->
+              <div class="analytics-card" id="setDistributionCard">
+                <div class="analytics-card-header">
+                  <h4>Set Composition & Power Scaling</h4>
+                  <span class="analytics-subtitle" title="Gateway > Dark Tournament > Ghost Files power progression">Power Tier Curve</span>
+                </div>
+                <!-- Stacked Segmented Distribution Bar -->
+                <div class="segmented-stat-bar" id="setStackedBar">
+                  <div class="seg-bar-fill seg-ghost-files" id="segGhostFiles" style="width: 0%;" title="Ghost Files (Base Set)"></div>
+                  <div class="seg-bar-fill seg-dark-tournament" id="segDarkTournament" style="width: 0%;" title="Dark Tournament (Mid Tier)"></div>
+                  <div class="seg-bar-fill seg-gateway" id="segGateway" style="width: 0%;" title="Gateway (Apex Tier)"></div>
+                </div>
+                <!-- Set Breakdown Legend Grid -->
+                <div class="set-stat-legend">
+                  <div class="set-legend-item legend-ghost-files" title="Ghost Files - Base Set (Regal Blue Packaging)">
+                    <span class="legend-color-dot dot-ghost-files"></span>
+                    <div class="legend-text-col">
+                      <div class="legend-title">Ghost Files <span class="legend-tier-tag tier-base">Base Set</span></div>
+                      <div class="legend-count" id="countGhostFiles">0 cards (0%)</div>
+                    </div>
+                  </div>
+                  <div class="set-legend-item legend-dark-tournament" title="Dark Tournament - Expansion (Magenta Pink Packaging)">
+                    <span class="legend-color-dot dot-dark-tournament"></span>
+                    <div class="legend-text-col">
+                      <div class="legend-title">Dark Tournament <span class="legend-tier-tag tier-mid">Mid Tier</span></div>
+                      <div class="legend-count" id="countDarkTournament">0 cards (0%)</div>
+                    </div>
+                  </div>
+                  <div class="set-legend-item legend-gateway" title="Gateway - Expansion (Bronze/Tan Packaging)">
+                    <span class="legend-color-dot dot-gateway"></span>
+                    <div class="legend-text-col">
+                      <div class="legend-title">Gateway <span class="legend-tier-tag tier-apex">Apex Tier</span></div>
+                      <div class="legend-count" id="countGateway">0 cards (0%)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- High-Tier Rarity Benchmark (Power Curve) -->
+              <div class="analytics-card" id="rarityDistributionCard">
+                <div class="analytics-card-header">
+                  <h4>High-Tier Rarity Benchmark</h4>
+                  <span class="analytics-subtitle" id="labelRarityBenchmarkScore" title="Foil & high-tier rare density">0 High-Tier Rares</span>
+                </div>
+                <!-- Stacked Segmented Rarity Bar -->
+                <div class="segmented-stat-bar" id="rarityStackedBar">
+                  <div class="seg-bar-fill seg-ghost-rare" id="segGhostRare" style="width: 0%;" title="Ghost Rare (Prismatic Gold)"></div>
+                  <div class="seg-bar-fill seg-uber-rare" id="segUberRare" style="width: 0%;" title="Uber / Super Rare (Amethyst Purple)"></div>
+                  <div class="seg-bar-fill seg-spirit-rare" id="segSpiritRare" style="width: 0%;" title="Spirit Rare (Radiant Cyan)"></div>
+                  <div class="seg-bar-fill seg-standard-rarity" id="segStandardRarity" style="width: 100%;" title="Standard Cards (Common / Uncommon / Rare)"></div>
+                </div>
+                <!-- Rarity Breakdown Legend Grid -->
+                <div class="rarity-stat-legend">
+                  <div class="rarity-legend-item legend-ghost-rare" title="Ghost Rares - Prismatic Gold foil">
+                    <span class="legend-color-dot dot-ghost-rare"></span>
+                    <div class="legend-text-col">
+                      <div class="legend-title">Ghost Rare</div>
+                      <div class="legend-count" id="countGhostRare">0 cards (0%)</div>
+                    </div>
+                  </div>
+                  <div class="rarity-legend-item legend-uber-rare" title="Uber & Super Rares - Radiant Purple foil">
+                    <span class="legend-color-dot dot-uber-rare"></span>
+                    <div class="legend-text-col">
+                      <div class="legend-title">Uber / Super Rare</div>
+                      <div class="legend-count" id="countUberRare">0 cards (0%)</div>
+                    </div>
+                  </div>
+                  <div class="rarity-legend-item legend-spirit-rare" title="Spirit Rares - Electric Cyan spirit foil">
+                    <span class="legend-color-dot dot-spirit-rare"></span>
+                    <div class="legend-text-col">
+                      <div class="legend-title">Spirit Rare</div>
+                      <div class="legend-count" id="countSpiritRare">0 cards (0%)</div>
+                    </div>
+                  </div>
+                  <div class="rarity-legend-item legend-standard-rarity" title="Standard Cards - Commons, Uncommons, and Rares">
+                    <span class="legend-color-dot dot-standard-rarity"></span>
+                    <div class="legend-text-col">
+                      <div class="legend-title">Standard Cards</div>
+                      <div class="legend-count" id="countStandardRarity">0 cards (0%)</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
           </div>

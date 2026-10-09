@@ -35,7 +35,7 @@ const state = {
 };
 window.state = state;
 
-// Team Bonus Descriptions Dictionary
+// Team Bonus Descriptions Dictionary (Rulebook & Official FAQ)
 const TEAM_BONUSES = {
   'Team Urameshi': {
     title: 'Team Urameshi Bonus Active',
@@ -43,7 +43,7 @@ const TEAM_BONUSES = {
   },
   'Team Toguro': {
     title: 'Team Toguro Bonus Active',
-    desc: 'When you use an attack, you may discard up to 2 cards from your hand. That attack gains +3000 Attack Value for this turn for each card discarded.'
+    desc: 'When you use an attack, you may discard up to 2 cards from your hand. That attack gains +3000 Attack Value for this turn for each card discarded in this way.'
   },
   'Team Saint Beasts': {
     title: 'Team Saint Beasts Bonus Active',
@@ -55,25 +55,103 @@ const TEAM_BONUSES = {
   },
   'Team Rokuyukai': {
     title: 'Team Rokuyukai Bonus Active',
-    desc: 'Special dice and bonus tokens apply to attack values and sideline recovery.'
+    desc: 'Your characters with the Rokuyukai Team Symbol gain +2000 Defense Value.'
   },
   'Team Uraotogi': {
     title: 'Team Uraotogi Bonus Active',
-    desc: 'Special item manipulation and weapon equipping advantages apply across match slots.'
+    desc: 'Your opponent cannot discard below 1 card in his hand when paying Attack Cost, and cannot draw cards while holding 6 or more cards.'
   },
   'Team Genkai': {
     title: 'Team Genkai Bonus Active',
-    desc: 'Spiritual mastery and technique enhancement bonuses apply.'
+    desc: 'When 1 of your characters with the Genkai Team Symbol enters the Arena, search your Deck for a technique and put it in your hand.'
+  },
+  'Team Ichigaki': {
+    title: 'Team Ichigaki Bonus Active',
+    desc: 'Cards attached to your opponent\'s characters on the Sideline are face-up instead of facedown.'
   },
   'Team Koenma': {
     title: 'Team Koenma Bonus Active',
-    desc: 'Event recycling and investigative spirit realm bonuses apply.'
+    desc: 'When your opponent attacks a character with the Koenma Team Symbol, discard top 2 cards of your Deck. For each event discarded, attacks get -2000 Attack Value.'
+  },
+  'Team Sarayashki': {
+    title: 'Team Sarayashiki Bonus Active',
+    desc: 'Once per turn, discard 1 face-up item in play and pay 1 Spirit Energy to search your Deck for an item and put it in your hand.'
+  },
+  'Team Sarayashiki': {
+    title: 'Team Sarayashiki Bonus Active',
+    desc: 'Once per turn, discard 1 face-up item in play and pay 1 Spirit Energy to search your Deck for an item and put it in your hand.'
   },
   'Team Sensui': {
     title: 'Team Sensui Bonus Active',
-    desc: 'Territory domain effects and multi-personality tactical adjustments apply.'
+    desc: 'All of your characters with the Sensui Team Symbol count as both Heroes and Villains for card effects.'
+  },
+  'Team Raizen': {
+    title: 'Team Raizen Bonus Active',
+    desc: 'All of your Team Leaders gain +2000 Attack Value and +2000 Defense Value.'
+  },
+  'Team Ronin': {
+    title: 'Team Ronin Bonus Active',
+    desc: 'Wandering rogue fighters gain independent skirmish and counter-attack advantages.'
+  },
+  'Team Villain': {
+    title: 'Team Villain Bonus Active',
+    desc: 'Villainous assault tactics and dark tournament disruption apply.'
   }
 };
+
+// Authentic Score Yu Yu Hakusho TCG Team Symbols (Exact Card Art Vectors)
+const TEAM_SYMBOLS_SVG = {
+  'Team Urameshi': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-urameshi" aria-label="Team Urameshi Symbol"><circle cx="16" cy="16" r="14.5" fill="#071426" stroke="#38bdf8" stroke-width="1.5"/><line x1="16" y1="2" x2="16" y2="7" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="25" x2="16" y2="30" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/><line x1="2" y1="16" x2="7" y2="16" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/><line x1="25" y1="16" x2="30" y2="16" stroke="#38bdf8" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="9" y2="9" stroke="#0ea5e9" stroke-width="1.5" stroke-linecap="round"/><line x1="26" y1="6" x2="23" y2="9" stroke="#0ea5e9" stroke-width="1.5" stroke-linecap="round"/><line x1="6" y1="26" x2="9" y2="23" stroke="#0ea5e9" stroke-width="1.5" stroke-linecap="round"/><line x1="26" y1="26" x2="23" y2="23" stroke="#0ea5e9" stroke-width="1.5" stroke-linecap="round"/><circle cx="16" cy="16" r="9" fill="none" stroke="#67e8f9" stroke-width="1.2" stroke-dasharray="3,2"/><path d="M4 16 Q10 14 16 16 Q22 18 28 16" fill="none" stroke="#22d3ee" stroke-width="1.2" opacity="0.8"/><circle cx="16" cy="16" r="5" fill="#dc2626" stroke="#fca5a5" stroke-width="1"/><ellipse cx="16" cy="16" rx="4" ry="2.2" fill="#7f1d1d"/><circle cx="15" cy="15" r="1.5" fill="#ffffff"/></svg>`,
+
+  'Team Toguro': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-toguro" aria-label="Team Toguro Symbol"><circle cx="16" cy="16" r="14.5" fill="#0f1f14" stroke="#22c55e" stroke-width="1.5"/><path d="M16 11 C13 5 7 4 3 8 C5 14 9 17 14 16 Z" fill="#15803d" stroke="#4ade80" stroke-width="0.8"/><path d="M16 11 C19 5 25 4 29 8 C27 14 23 17 18 16 Z" fill="#15803d" stroke="#4ade80" stroke-width="0.8"/><path d="M6 7 C8 11 11 14 14 15 M26 7 C24 11 21 14 18 15" stroke="#86efac" stroke-width="0.7" fill="none"/><path d="M11 20 L9 26 M13 21 L12 28 M16 22 L16 29 M19 21 L20 28 M21 20 L23 26" stroke="#16a34a" stroke-width="1.4" stroke-linecap="round"/><circle cx="16" cy="15" r="5.5" fill="#ea580c" stroke="#fed7aa" stroke-width="1"/><ellipse cx="16" cy="15" rx="1.2" ry="4.2" fill="#18181b"/><circle cx="15.2" cy="13.8" r="0.8" fill="#ffedd5"/></svg>`,
+
+  'Team Genkai': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-genkai" aria-label="Team Genkai Symbol"><circle cx="16" cy="16" r="14.5" fill="#1e1022" stroke="#d946ef" stroke-width="1.5"/><circle cx="16" cy="16" r="8" fill="#881337" stroke="#fb7185" stroke-width="1"/><path d="M11 22 C13 18 19 14 21 10 C23 12 21 18 17 21 Z" fill="#a21caf" stroke="#f0abfc" stroke-width="0.8"/><circle cx="16" cy="5" r="3.2" fill="#0284c7" stroke="#bae6fd" stroke-width="1"/><circle cx="15" cy="4.2" r="1" fill="#ffffff"/><circle cx="6.5" cy="22" r="3.2" fill="#9333ea" stroke="#e9d5ff" stroke-width="1"/><circle cx="5.7" cy="21.2" r="1" fill="#ffffff"/><circle cx="25.5" cy="22" r="3.2" fill="#eab308" stroke="#fef08a" stroke-width="1"/><circle cx="24.7" cy="21.2" r="1" fill="#ffffff"/></svg>`,
+
+  'Team Masho': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-masho" aria-label="Team Masho Symbol"><circle cx="16" cy="16" r="14.5" fill="#1c1917" stroke="#f59e0b" stroke-width="1.5"/><path d="M14 3 L18 3 L18 6 L22 4 L24 8 L21 10 L26 12 L25 16 L22 17 L25 21 L22 23 L19 21 L18 26 L14 26 L14 22 L11 23 L9 20 L12 18 L7 16 L8 12 L12 11 L9 7 L12 5 L14 7 Z" fill="#b45309" stroke="#fbbf24" stroke-width="0.8"/><circle cx="16" cy="14" r="7" fill="#451a03" stroke="#fde68a" stroke-width="1"/><path d="M16 8 C18 12 21 14 21 17 C21 20 18.5 21.5 16 21.5 C13.5 21.5 11 20 11 17 C11 14 14 12 16 8 Z" fill="#d97706" stroke="#fef3c7" stroke-width="0.8"/><path d="M4 23 Q16 27 28 23 L24 28 Q16 30 8 28 Z" fill="#92400e" stroke="#f59e0b" stroke-width="0.8"/></svg>`,
+
+  'Team Saint Beasts': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-saintbeasts" aria-label="Team Saint Beasts Symbol"><circle cx="16" cy="16" r="14.5" fill="#082f49" stroke="#0ea5e9" stroke-width="1.5"/><path d="M2 9 C8 8 24 6 30 7 L28 10 C20 9 9 10 3 11 Z" fill="#0284c7" opacity="0.9"/><path d="M1 16 C8 15 24 14 31 15 L29 18 C20 17 9 18 2 19 Z" fill="#0369a1" opacity="0.9"/><path d="M2 23 C8 22 24 21 30 22 L28 25 C20 24 9 25 3 26 Z" fill="#0284c7" opacity="0.9"/><polygon points="16,8 23,12 23,20 16,24 9,20 9,12" fill="#ca8a04" stroke="#fde047" stroke-width="1.2"/><line x1="16" y1="8" x2="16" y2="24" stroke="#a16207" stroke-width="1"/><line x1="9" y1="12" x2="23" y2="20" stroke="#a16207" stroke-width="1"/><line x1="9" y1="20" x2="23" y2="12" stroke="#a16207" stroke-width="1"/><circle cx="16" cy="7" r="2.2" fill="#38bdf8" stroke="#ffffff" stroke-width="0.6"/><circle cx="24" cy="16" r="2.2" fill="#38bdf8" stroke="#ffffff" stroke-width="0.6"/><circle cx="16" cy="25" r="2.2" fill="#38bdf8" stroke="#ffffff" stroke-width="0.6"/><circle cx="8" cy="16" r="2.2" fill="#38bdf8" stroke="#ffffff" stroke-width="0.6"/></svg>`,
+
+  'Team Rokuyukai': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-rokuyukai" aria-label="Team Rokuyukai Symbol"><circle cx="16" cy="16" r="14.5" fill="#2a1205" stroke="#f97316" stroke-width="1.5"/><path d="M8 12 C9 5 13 2 16 1 C17 5 19 6 22 4 C24 9 23 12 24 13 Z" fill="#ea580c" stroke="#fdba74" stroke-width="0.8"/><path d="M11 11 C12 7 14 5 16 3 C17 6 18 7 20 6 C21 9 20 11 21 12 Z" fill="#facc15"/><circle cx="16" cy="14" r="6" fill="#eab308" stroke="#fef08a" stroke-width="1.2"/><circle cx="9" cy="22" r="3.2" fill="#7c2d12" stroke="#ea580c" stroke-width="1.2"/><circle cx="9" cy="22" r="1.5" fill="#f97316"/><circle cx="16" cy="24" r="3.2" fill="#7c2d12" stroke="#ea580c" stroke-width="1.2"/><circle cx="16" cy="24" r="1.5" fill="#f97316"/><circle cx="23" cy="22" r="3.2" fill="#7c2d12" stroke="#ea580c" stroke-width="1.2"/><circle cx="23" cy="22" r="1.5" fill="#f97316"/></svg>`,
+
+  'Team Uraotogi': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-uraotogi" aria-label="Team Uraotogi Symbol"><circle cx="16" cy="16" r="14.5" fill="#240c1e" stroke="#db2777" stroke-width="1.5"/><path d="M7 6 C10 4 11 8 8 10 M25 6 C22 4 21 8 24 10 M3 19 C6 18 6 22 4 24 M29 19 C26 18 26 22 28 24 M12 29 C14 26 18 26 20 29" stroke="#f472b6" stroke-width="1.5" fill="none" stroke-linecap="round"/><polygon points="16,5 25,10 25,22 16,27 7,22 7,10" fill="#831843" stroke="#f43f5e" stroke-width="1.2"/><path d="M12 11 L20 11 L22 15 L21 21 L16 23 L11 21 L10 15 Z" fill="#1f0918" stroke="#fda4af" stroke-width="0.8"/><polygon points="12,14 15,15 13,16" fill="#f43f5e"/><polygon points="20,14 17,15 19,16" fill="#f43f5e"/><path d="M13 19 Q16 17 19 19 L18 21 Q16 20 14 21 Z" fill="#fb7185"/></svg>`,
+
+  'Team Ichigaki': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-ichigaki" aria-label="Team Ichigaki Symbol"><circle cx="16" cy="16" r="14.5" fill="#052e16" stroke="#22c55e" stroke-width="1.5"/><line x1="2" y1="16" x2="30" y2="16" stroke="#4ade80" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="2" x2="16" y2="12" stroke="#4ade80" stroke-width="2" stroke-linecap="round"/><path d="M10 21 L6 27 M22 21 L26 27 M16 23 L16 29" stroke="#16a34a" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="16" r="6.5" fill="#b91c1c" stroke="#f87171" stroke-width="1.2"/><circle cx="14" cy="14.5" r="1.3" fill="#14532d"/><circle cx="18" cy="14.5" r="1.3" fill="#14532d"/><path d="M14 18 H18" stroke="#14532d" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+
+  'Team Koenma': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-koenma" aria-label="Team Koenma Symbol"><circle cx="16" cy="16" r="14.5" fill="#2b0e14" stroke="#ef4444" stroke-width="1.5"/><path d="M5 8 C8 4 13 4 16 6 C19 4 24 4 27 8 L27 18 C25 15 23 15 21 17 C19 14 13 14 11 17 C9 15 7 15 5 18 Z" fill="#991b1b" stroke="#fca5a5" stroke-width="0.8"/><circle cx="8" cy="8" r="1.8" fill="#eab308" stroke="#fef08a" stroke-width="0.6"/><circle cx="24" cy="8" r="1.8" fill="#eab308" stroke="#fef08a" stroke-width="0.6"/><circle cx="16" cy="14" r="5.5" fill="#7f1d1d" stroke="#f87171" stroke-width="1"/><line x1="16" y1="10" x2="16" y2="18" stroke="#fca5a5" stroke-width="1.2"/><line x1="12" y1="14" x2="20" y2="14" stroke="#fca5a5" stroke-width="1.2"/><circle cx="16" cy="23" r="3.8" fill="#06b6d4" stroke="#a5f3fc" stroke-width="1"/><circle cx="15.2" cy="22" r="1.2" fill="#ffffff"/></svg>`,
+
+  'Team Sarayashki': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-sarayashki" aria-label="Team Sarayashiki Symbol"><circle cx="16" cy="16" r="14.5" fill="#062d1a" stroke="#10b981" stroke-width="1.5"/><path d="M7 8 L13 6 L16 11 L19 6 L25 8 L27 21 L22 22 L20 15 L16 18 L12 15 L10 22 L5 21 Z" fill="#15803d" stroke="#86efac" stroke-width="0.8"/><circle cx="16" cy="13" r="5" fill="#1d4ed8" stroke="#93c5fd" stroke-width="1"/><circle cx="15" cy="12" r="1.2" fill="#ffffff"/><path d="M16 18 L13 26 L16 24 L19 26 Z" fill="#fbbf24" stroke="#fef08a" stroke-width="0.7"/></svg>`,
+
+  'Team Sensui': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-sensui" aria-label="Team Sensui Symbol"><circle cx="16" cy="16" r="14.5" fill="#0f172a" stroke="#38bdf8" stroke-width="1.5"/><circle cx="16" cy="16" r="11" fill="#1e1b4b" stroke="#6366f1" stroke-width="1"/><path d="M16 2 L17 4 M30 16 L28 17 M16 30 L15 28 M2 16 L4 15" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/><line x1="8" y1="24" x2="24" y2="8" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/><line x1="8" y1="24" x2="24" y2="8" stroke="#ffffff" stroke-width="1.2" stroke-linecap="round"/><line x1="16" y1="9" x2="16" y2="17" stroke="#67e8f9" stroke-width="1.2" stroke-linecap="round"/><line x1="12" y1="13" x2="20" y2="13" stroke="#67e8f9" stroke-width="1.2" stroke-linecap="round"/></svg>`,
+
+  'Team Raizen': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-raizen" aria-label="Team Raizen Symbol"><circle cx="16" cy="16" r="14.5" fill="#291505" stroke="#d97706" stroke-width="1.5"/><circle cx="16" cy="16" r="10.5" fill="#b45309" stroke="#fde68a" stroke-width="1.2"/><path d="M12 7 C14 11 11 18 10 24" stroke="#1c1917" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M17 6 C19 12 16 19 15 25" stroke="#1c1917" stroke-width="2.2" stroke-linecap="round" fill="none"/><path d="M22 8 C23 13 21 18 20 23" stroke="#1c1917" stroke-width="2.2" stroke-linecap="round" fill="none"/></svg>`,
+
+  'Team Ronin': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-ronin" aria-label="Team Ronin Symbol"><circle cx="16" cy="16" r="14.5" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"/><line x1="6" y1="6" x2="26" y2="26" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/><line x1="26" y1="6" x2="6" y2="26" stroke="#e2e8f0" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="16" r="4.5" fill="#334155" stroke="#cbd5e1" stroke-width="1"/><circle cx="16" cy="16" r="1.8" fill="#f8fafc"/></svg>`,
+
+  'Team Villain': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-villain" aria-label="Team Villain Symbol"><circle cx="16" cy="16" r="14.5" fill="#180b25" stroke="#a855f7" stroke-width="1.5"/><path d="M7 7 C10 12 12 14 16 13 C20 14 22 12 25 7 C24 15 22 23 16 27 C10 23 8 15 7 7 Z" fill="#6b21a8" stroke="#c084fc" stroke-width="1"/><line x1="12" y1="15" x2="15" y2="16" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/><line x1="20" y1="15" x2="17" y2="16" stroke="#ef4444" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+
+  'None': `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20" class="team-symbol-svg team-symbol-none" aria-label="No Team Symbol"><circle cx="16" cy="16" r="14.5" fill="#1e293b" stroke="#475569" stroke-width="1.5"/><circle cx="16" cy="16" r="6" fill="none" stroke="#64748b" stroke-width="1.5" stroke-dasharray="3,3"/></svg>`
+};
+
+/**
+ * Returns authentic SVG markup for an official YYH team symbol.
+ * @param {string|null} teamName - e.g. "Team Urameshi", "Team Toguro"
+ * @param {number} size - Icon dimension in pixels (width/height)
+ * @param {string} extraClass - Additional CSS class(es)
+ * @returns {string} Safe inline SVG markup
+ */
+function getTeamSymbolSvg(teamName, size = 18, extraClass = '') {
+  let key = (teamName || '').trim();
+  if (key === 'Team Sarayashiki') key = 'Team Sarayashki';
+  if (!key || !TEAM_SYMBOLS_SVG[key]) key = 'None';
+  let svg = TEAM_SYMBOLS_SVG[key] || TEAM_SYMBOLS_SVG['None'];
+  if (size !== 20) {
+    svg = svg.replace('width="20"', `width="${size}"`).replace('height="20"', `height="${size}"`);
+  }
+  if (extraClass) {
+    svg = svg.replace('class="team-symbol-svg ', `class="team-symbol-svg ${extraClass} `);
+  }
+  return svg;
+}
 
 // Initialize App
 document.addEventListener('DOMContentLoaded', async () => {
@@ -337,7 +415,7 @@ function renderCardGrid() {
     else if (c.cardType === 'Event') typeClass = 'badge-event';
 
     let badgesHtml = `<span class="badge ${typeClass}">${c.cardType}</span>`;
-    if (c.team) badgesHtml += `<span class="badge badge-team">${c.team.replace('Team ', '')}</span>`;
+    if (c.team) badgesHtml += `<span class="badge badge-team">${getTeamSymbolSvg(c.team, 13, 'inline-team-symbol')} ${c.team.replace('Team ', '')}</span>`;
     if (c.defense) badgesHtml += `<span class="badge badge-def">DEF ${c.defense}</span>`;
     if (c.seCost !== null) badgesHtml += `<span class="badge badge-se">SE ${c.seCost}</span>`;
     if (c.hasErrata) badgesHtml += `<span class="badge badge-errata" title="Official Tournament Ruling / Errata">⚖️ Errata</span>`;
@@ -614,7 +692,7 @@ function openCardModal(card) {
   `;
   if (card.alignment) badgesContainer.innerHTML += `<span class="badge">${card.alignment}</span>`;
   if (card.isTeamLeader) badgesContainer.innerHTML += `<span class="badge" style="background:#f59e0b;color:#000">Team Leader</span>`;
-  if (card.team) badgesContainer.innerHTML += `<span class="badge badge-team">${card.team}</span>`;
+  if (card.team) badgesContainer.innerHTML += `<span class="badge badge-team">${getTeamSymbolSvg(card.team, 15, 'inline-team-symbol')} ${card.team}</span>`;
   if (card.limitPerDeck === 1) badgesContainer.innerHTML += `<span class="badge" style="background:#dc2626;color:#fff">Limit 1 per Deck</span>`;
   else if (card.limitPerDeck === 2) badgesContainer.innerHTML += `<span class="badge" style="background:#ea580c;color:#fff">Limit 2 per Deck</span>`;
   if (card.hasErrata) badgesContainer.innerHTML += `<span class="badge badge-errata">⚖️ Tournament Errata</span>`;
@@ -1412,7 +1490,7 @@ function renderDeckBuilder() {
           <div class="slot-char-info">
             <div class="slot-char-name" title="${card.name}">${card.name}</div>
             <div class="slot-char-meta">
-              <span>${card.team ? card.team.replace('Team ', '') : 'Neutral'}</span>
+              <span class="slot-team-tag">${card.team ? `${getTeamSymbolSvg(card.team, 14, 'slot-team-icon')} ${card.team.replace('Team ', '')}` : 'Neutral'}</span>
               <span class="slot-char-def">DEF ${card.defense || 0}</span>
             </div>
           </div>
@@ -1708,6 +1786,8 @@ function evaluateTeamBonus() {
       };
 
       banner.className = 'team-bonus-banner active';
+      const iconContainer = banner.querySelector('.team-bonus-icon');
+      if (iconContainer) iconContainer.innerHTML = getTeamSymbolSvg(activeTeam, 36, 'banner-team-icon');
       title.textContent = bonusInfo.title;
       desc.textContent = bonusInfo.desc;
       return;
@@ -1715,6 +1795,8 @@ function evaluateTeamBonus() {
   }
 
   banner.className = 'team-bonus-banner inactive';
+  const iconContainer = banner.querySelector('.team-bonus-icon');
+  if (iconContainer) iconContainer.innerHTML = getTeamSymbolSvg(null, 36, 'banner-team-icon');
   title.textContent = 'Team Bonus Inactive';
   desc.textContent = 'Include 4 starting characters with the same Team Symbol to unlock that team\'s special game bonus!';
 }
@@ -1782,6 +1864,154 @@ function renderAnalytics(mainDeckCount) {
       document.getElementById(`bar${k}`).style.width = '0%';
       document.getElementById(`labelBar${k}`).textContent = '0%';
     });
+  }
+
+  // 3. Set Distribution & Power Scaling Bar (Ghost Files, Dark Tournament, Gateway)
+  const allDeckCards = [];
+  // Starting characters
+  for (let s = 1; s <= 4; s++) {
+    const sId = state.currentDeck.slots?.[s];
+    if (sId) {
+      const card = state.cardMap.get(sId);
+      if (card) allDeckCards.push({ card, count: 1 });
+    }
+  }
+  // Main deck
+  for (const [id, count] of Object.entries(state.currentDeck.mainDeck || {})) {
+    const card = state.cardMap.get(id);
+    if (card && count > 0) {
+      allDeckCards.push({ card, count });
+    }
+  }
+
+  const totalDeckCards = allDeckCards.reduce((acc, c) => acc + c.count, 0);
+
+  let gfCount = 0;
+  let dtCount = 0;
+  let gwCount = 0;
+
+  let ghostRareCount = 0;
+  let uberRareCount = 0;
+  let spiritRareCount = 0;
+  let standardCount = 0;
+
+  for (const item of allDeckCards) {
+    const set = item.card.set || '';
+    if (set === 'Ghost Files') gfCount += item.count;
+    else if (set === 'Dark Tournament') dtCount += item.count;
+    else if (set === 'Gateway') gwCount += item.count;
+    else gfCount += item.count;
+
+    // Rarity classification
+    const r = (item.card.rarity || '').trim();
+    const cn = (item.card.cardNumber || '').trim().toUpperCase();
+
+    if (r.toLowerCase().includes('ghost') || (cn.startsWith('G') && !cn.startsWith('GF'))) {
+      ghostRareCount += item.count;
+    } else if (r.toLowerCase().includes('super') || r.toLowerCase().includes('uber') || cn.startsWith('TS') || (cn.startsWith('S') && !cn.startsWith('ST'))) {
+      uberRareCount += item.count;
+    } else if (r.toLowerCase().includes('spirit rare') || cn.startsWith('TR') || cn.startsWith('TU')) {
+      spiritRareCount += item.count;
+    } else {
+      standardCount += item.count;
+    }
+  }
+
+  // Update Set Distribution UI (Regal Blue, Magenta Pink, Bronze/Tan)
+  const elSegGf = document.getElementById('segGhostFiles');
+  const elSegDt = document.getElementById('segDarkTournament');
+  const elSegGw = document.getElementById('segGateway');
+  const elCountGf = document.getElementById('countGhostFiles');
+  const elCountDt = document.getElementById('countDarkTournament');
+  const elCountGw = document.getElementById('countGateway');
+
+  if (totalDeckCards > 0) {
+    const gfPct = Math.round((gfCount / totalDeckCards) * 100);
+    const dtPct = Math.round((dtCount / totalDeckCards) * 100);
+    const gwPct = Math.max(0, 100 - gfPct - dtPct);
+
+    if (elSegGf) {
+      elSegGf.style.width = `${gfPct}%`;
+      elSegGf.title = `Ghost Files: ${gfCount} cards (${gfPct}%) - Base Set`;
+    }
+    if (elSegDt) {
+      elSegDt.style.width = `${dtPct}%`;
+      elSegDt.title = `Dark Tournament: ${dtCount} cards (${dtPct}%) - Mid Tier`;
+    }
+    if (elSegGw) {
+      elSegGw.style.width = `${gwPct}%`;
+      elSegGw.title = `Gateway: ${gwCount} cards (${gwPct}%) - Apex Tier`;
+    }
+
+    if (elCountGf) elCountGf.textContent = `${gfCount} cards (${gfPct}%)`;
+    if (elCountDt) elCountDt.textContent = `${dtCount} cards (${dtPct}%)`;
+    if (elCountGw) elCountGw.textContent = `${gwCount} cards (${gwPct}%)`;
+  } else {
+    if (elSegGf) elSegGf.style.width = '0%';
+    if (elSegDt) elSegDt.style.width = '0%';
+    if (elSegGw) elSegGw.style.width = '0%';
+    if (elCountGf) elCountGf.textContent = '0 cards (0%)';
+    if (elCountDt) elCountDt.textContent = '0 cards (0%)';
+    if (elCountGw) elCountGw.textContent = '0 cards (0%)';
+  }
+
+  // Update High-Tier Rarity Benchmark UI (Ghost Gold, Uber Purple, Spirit Cyan, Standard Slate)
+  const elSegGhost = document.getElementById('segGhostRare');
+  const elSegUber = document.getElementById('segUberRare');
+  const elSegSpirit = document.getElementById('segSpiritRare');
+  const elSegStandard = document.getElementById('segStandardRarity');
+  const elCountGhost = document.getElementById('countGhostRare');
+  const elCountUber = document.getElementById('countUberRare');
+  const elCountSpirit = document.getElementById('countSpiritRare');
+  const elCountStandard = document.getElementById('countStandardRarity');
+  const elBenchScore = document.getElementById('labelRarityBenchmarkScore');
+
+  const totalHighTierRares = ghostRareCount + uberRareCount + spiritRareCount;
+
+  if (totalDeckCards > 0) {
+    const ghostPct = (ghostRareCount / totalDeckCards * 100);
+    const uberPct = (uberRareCount / totalDeckCards * 100);
+    const spiritPct = (spiritRareCount / totalDeckCards * 100);
+    const standardPct = (standardCount / totalDeckCards * 100);
+    const highTierDensity = Math.round((totalHighTierRares / totalDeckCards) * 100);
+
+    if (elSegGhost) {
+      elSegGhost.style.width = `${ghostPct.toFixed(1)}%`;
+      elSegGhost.title = `Ghost Rares: ${ghostRareCount} cards (${Math.round(ghostPct)}%)`;
+    }
+    if (elSegUber) {
+      elSegUber.style.width = `${uberPct.toFixed(1)}%`;
+      elSegUber.title = `Uber / Super Rares: ${uberRareCount} cards (${Math.round(uberPct)}%)`;
+    }
+    if (elSegSpirit) {
+      elSegSpirit.style.width = `${spiritPct.toFixed(1)}%`;
+      elSegSpirit.title = `Spirit Rares: ${spiritRareCount} cards (${Math.round(spiritPct)}%)`;
+    }
+    if (elSegStandard) {
+      elSegStandard.style.width = `${standardPct.toFixed(1)}%`;
+      elSegStandard.title = `Standard Cards: ${standardCount} cards (${Math.round(standardPct)}%)`;
+    }
+
+    if (elCountGhost) elCountGhost.textContent = `${ghostRareCount} cards (${Math.round(ghostPct)}%)`;
+    if (elCountUber) elCountUber.textContent = `${uberRareCount} cards (${Math.round(uberPct)}%)`;
+    if (elCountSpirit) elCountSpirit.textContent = `${spiritRareCount} cards (${Math.round(spiritPct)}%)`;
+    if (elCountStandard) elCountStandard.textContent = `${standardCount} cards (${Math.round(standardPct)}%)`;
+
+    if (elBenchScore) {
+      elBenchScore.textContent = `${totalHighTierRares} High-Tier Rares (${highTierDensity}% Power Density)`;
+    }
+  } else {
+    if (elSegGhost) elSegGhost.style.width = '0%';
+    if (elSegUber) elSegUber.style.width = '0%';
+    if (elSegSpirit) elSegSpirit.style.width = '0%';
+    if (elSegStandard) elSegStandard.style.width = '100%';
+
+    if (elCountGhost) elCountGhost.textContent = '0 cards (0%)';
+    if (elCountUber) elCountUber.textContent = '0 cards (0%)';
+    if (elCountSpirit) elCountSpirit.textContent = '0 cards (0%)';
+    if (elCountStandard) elCountStandard.textContent = '0 cards (0%)';
+
+    if (elBenchScore) elBenchScore.textContent = '0 High-Tier Rares';
   }
 }
 
@@ -1878,7 +2108,13 @@ function renderDeckArchetype(archetype) {
   const iconEl = document.getElementById('archetypeIcon');
   const nameEl = document.getElementById('archetypeName');
   const descEl = document.getElementById('archetypeDesc');
-  if (iconEl) iconEl.textContent = archetype.icon || '⚡';
+  if (iconEl) {
+    if (archetype.team) {
+      iconEl.innerHTML = getTeamSymbolSvg(archetype.team, 26, 'archetype-team-icon');
+    } else {
+      iconEl.textContent = archetype.icon || '⚡';
+    }
+  }
   if (nameEl) nameEl.textContent = archetype.name || 'Custom Archetype';
   if (descEl) descEl.textContent = archetype.desc || '';
 }
@@ -2125,7 +2361,7 @@ function renderMatchupSimulation(sim) {
 
       card.innerHTML = `
         <div class="sim-matchup-head">
-          <span class="sim-matchup-name">${m.icon || '⚔️'} ${m.opponentName}</span>
+          <span class="sim-matchup-name">${getTeamSymbolSvg(m.team || m.opponentName, 18, 'matchup-symbol')} ${m.opponentName}</span>
           <span class="sim-matchup-winrate ${statusClass}">${m.winRatePct}% Win</span>
         </div>
         <div class="sim-matchup-bar-track">
@@ -2422,11 +2658,11 @@ async function loadSavedDecks() {
 }
 
 function getDeckTeamBonus(deck) {
-  if (!deck || !deck.slots) return { hasBonus: false, teamName: null, label: 'No Team Bonus', icon: '⚪' };
+  if (!deck || !deck.slots) return { hasBonus: false, teamName: null, label: 'No Team Bonus', icon: getTeamSymbolSvg(null, 15) };
 
   const charIds = [deck.slots[1], deck.slots[2], deck.slots[3], deck.slots[4]].filter(Boolean);
   if (charIds.length < 4) {
-    return { hasBonus: false, teamName: null, label: 'No Team Bonus (Fewer than 4 fighters)', icon: '⚪' };
+    return { hasBonus: false, teamName: null, label: 'No Team Bonus (Fewer than 4 fighters)', icon: getTeamSymbolSvg(null, 15) };
   }
 
   const teams = charIds.map(id => {
@@ -2436,20 +2672,11 @@ function getDeckTeamBonus(deck) {
 
   if (teams.every(t => t && t === teams[0])) {
     const team = teams[0];
-    const iconMap = {
-      'Team Toguro': '💪',
-      'Team Urameshi': '⚡',
-      'Team Genkai': '🥋',
-      'Team Masho': '🥷',
-      'Team Saint Beasts': '🐉',
-      'Team Uraotogi': '🎭',
-      'Team Rokuyukai': '🔥'
-    };
     return {
       hasBonus: true,
       teamName: team,
       label: `${team} Bonus Active`,
-      icon: iconMap[team] || '✨'
+      icon: getTeamSymbolSvg(team, 15)
     };
   }
 
@@ -2457,16 +2684,22 @@ function getDeckTeamBonus(deck) {
     hasBonus: false,
     teamName: null,
     label: 'No Team Bonus',
-    icon: '⚪'
+    icon: getTeamSymbolSvg(null, 15)
   };
 }
 
 function renderTeamBonusTagHtml(deck) {
   const bonus = getDeckTeamBonus(deck);
   if (bonus.hasBonus) {
-    return `<span class="deck-team-tag tag-bonus-active" title="Active Team Bonus: ${bonus.teamName}"><span class="team-tag-dot"></span>${bonus.icon} ${bonus.teamName} Bonus Active</span>`;
+    return `<span class="deck-team-tag tag-bonus-active" title="Active Team Bonus: ${bonus.teamName}">
+      ${getTeamSymbolSvg(bonus.teamName, 15, 'tag-team-icon')}
+      <span>${bonus.teamName} Bonus Active</span>
+    </span>`;
   }
-  return `<span class="deck-team-tag tag-bonus-none" title="All 4 starting fighters must share the same team to unlock a team bonus"><span class="team-tag-dot"></span>No Team Bonus</span>`;
+  return `<span class="deck-team-tag tag-bonus-none" title="All 4 starting fighters must share the same team to unlock a team bonus">
+    ${getTeamSymbolSvg(null, 15, 'tag-team-icon')}
+    <span>No Team Bonus</span>
+  </span>`;
 }
 
 function renderSavedDecks() {
@@ -2511,7 +2744,7 @@ function renderGauntletDecksGrid() {
       <div class="library-card-header">
         <div>
           <div class="library-deck-title-row">
-            <span class="gauntlet-card-icon">${deck.icon || '⚔️'}</span>
+            <span class="gauntlet-card-icon">${getTeamSymbolSvg(deck.team, 20)}</span>
             <div class="library-deck-name">${deck.name}</div>
           </div>
           <div class="library-deck-author">Gauntlet Opponent (${deck.author || 'Score Benchmark'})</div>
@@ -3028,7 +3261,7 @@ function renderGauntletPills() {
     pill.className = `gauntlet-pill ${isEnabled ? 'active' : 'inactive'}`;
     pill.title = isEnabled ? `Click to exclude "${deck.name}" from simulation` : `Click to include "${deck.name}" in simulation`;
     pill.innerHTML = `
-      <span class="gauntlet-pill-icon">${deck.icon || '⚔️'}</span>
+      <span class="gauntlet-pill-icon">${getTeamSymbolSvg(deck.team, 16, 'pill-symbol')}</span>
       <span class="gauntlet-pill-name">${deck.name.replace(/^Team\s+/i, '')}</span>
       <span class="gauntlet-pill-check">${isEnabled ? '✓' : '✗'}</span>
     `;
@@ -3128,9 +3361,9 @@ function renderGauntletModalDecks() {
         <input type="checkbox" class="gauntlet-toggle-check" ${isEnabled ? 'checked' : ''} title="Include this opponent in simulations">
         <div class="gauntlet-deck-info">
           <div class="gauntlet-deck-title-row">
-            <span class="gauntlet-deck-icon">${deck.icon || '⚔️'}</span>
+            <span class="gauntlet-deck-icon">${getTeamSymbolSvg(deck.team, 20, 'modal-deck-symbol')}</span>
             <span class="gauntlet-deck-title">${deck.name}</span>
-            <span class="gauntlet-deck-tag">${deck.team || 'No Team'}</span>
+            <span class="gauntlet-deck-tag">${getTeamSymbolSvg(deck.team, 14, 'modal-tag-symbol')} ${deck.team || 'No Team'}</span>
           </div>
           <div class="gauntlet-deck-sub">
             <span>Main: <strong>${mainCount}</strong> cards</span>
@@ -3465,20 +3698,10 @@ function importSavedDeckToGauntlet() {
     }
   }
 
-  const iconMap = {
-    'Team Toguro': '💪',
-    'Team Urameshi': '⚡',
-    'Team Genkai': '🥋',
-    'Team Masho': '🥷',
-    'Team Saint Beasts': '🐉',
-    'Team Uraotogi': '🎭',
-    'Team Rokuyukai': '🔥'
-  };
-
   state.metaGauntlet[newKey] = {
     name: deck.name || 'Imported Opponent',
     team: detectedTeam,
-    icon: iconMap[detectedTeam] || '⚔️',
+    icon: getTeamSymbolSvg(detectedTeam, 20),
     slots: { ...(deck.slots || { 1: null, 2: null, 3: null, 4: null }) },
     mainDeck: { ...(deck.mainDeck || {}) },
     enabled: true
