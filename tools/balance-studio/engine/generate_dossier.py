@@ -1,0 +1,270 @@
+import json
+import os
+
+DOSSIER = {
+    "version": "1.0.0",
+    "lastUpdated": "2026-10-09",
+    "title": "Score Yu Yu Hakusho TCG: Card Valuation Methodology & System Constitution",
+    "description": "Comprehensive game design philosophy, mathematical foundations, and economic baseline metrics for the 18 micro-categories of card evaluation.",
+    "categories": {
+        "flat_atk_boost": {
+            "name": "Flat Attack Boost",
+            "group": "Combat & Survivability",
+            "defaultWeight": 1.10,
+            "unit": "ATK Value",
+            "formatBaseline": "+2000 ATK",
+            "philosophy": "In Score YYH, attacks must meet or exceed opponent DEF to inflict wounds. An attack boost turns a failed strike into a hit, or pushes a standard hit into the double-damage cliff (>= 2x DEF). Value scales with magnitude: +500 is sub-par, +2000 is format par, +4000 is elite.",
+            "formula": "Points = clamp((boost_value / 2000) * 25, 0, 45)",
+            "anchors": {
+                "S_tier": "No Mercy (+4000 ATK, 0 SE) -> 45 pts",
+                "A_tier": "Efflux (+3000 ATK, 0 SE) -> 35 pts",
+                "B_tier": "Standard Attack Pump (+2000 ATK) -> 25 pts",
+                "C_tier": "Minor Jab (+1000 ATK) -> 12 pts"
+            }
+        },
+        "flat_def_boost": {
+            "name": "Flat Defense Boost",
+            "group": "Combat & Survivability",
+            "defaultWeight": 1.35,
+            "unit": "DEF Value",
+            "formatBaseline": "+1500 DEF",
+            "philosophy": "DEF is non-linear in YYH because double damage requires 2x DEF. A +2000 DEF boost on a 5000 DEF fighter raises the double-damage threshold from 10,000 to 14,000, virtually locking out lethal multi-card alpha strikes.",
+            "formula": "Points = clamp((boost_value / 1500) * 28, 0, 50)",
+            "anchors": {
+                "S_tier": "Defensive Posture (+3000 DEF, 0 SE) -> 48 pts",
+                "A_tier": "Earthen Armor (+2000 DEF) -> 36 pts",
+                "B_tier": "Standard Block (+1500 DEF) -> 28 pts",
+                "C_tier": "Minor Ward (+500 DEF) -> 10 pts"
+            }
+        },
+        "atk_discard_efficiency": {
+            "name": "Attack-to-Discard Efficiency",
+            "group": "Combat & Survivability",
+            "defaultWeight": 1.25,
+            "unit": "Damage per Discard",
+            "formatBaseline": "3000 Damage per Discard",
+            "philosophy": "Hand cards are attack ammunition. Attacks that cost 0 or 1 discard preserve hand cards for defense and subsequent turns. An attack doing 6000 damage for 1 discard is twice as efficient as 6000 damage for 2 discards.",
+            "formula": "Ratio = Damage / (DiscardCost + 1); Points = clamp((Ratio / 2000) * 20, 0, 40)",
+            "anchors": {
+                "S_tier": "0-Discard / 4000+ Damage Attacks -> 40 pts",
+                "A_tier": "1-Discard / 6000 Damage Attacks -> 32 pts",
+                "B_tier": "2-Discard / 6000 Damage Attacks -> 20 pts",
+                "C_tier": "3-Discard / 6000 Damage Attacks -> 10 pts"
+            }
+        },
+        "absolute_stall": {
+            "name": "Absolute Attack Stalling",
+            "group": "Combat & Survivability",
+            "defaultWeight": 1.65,
+            "unit": "Step Cancellation Equity",
+            "formatBaseline": "N/A (Elite Mechanic)",
+            "philosophy": "Ending an attack step or completely negating an attack neutralizes both the opponent's main strike and all attached attack pump cards. It generates virtual card advantage and preserves match slot integrity.",
+            "formula": "Points = BaseStallValue (35 to 50 pts based on conditionality)",
+            "anchors": {
+                "S_tier": "Halt! (Completely ends attack step unconditionally) -> 50 pts",
+                "A_tier": "Time Out (Ends attack step during setup/attack) -> 42 pts",
+                "B_tier": "Conditional End (Requires specific team/trait) -> 28 pts"
+            }
+        },
+        "wound_mitigation": {
+            "name": "Wound & Damage Mitigation",
+            "group": "Combat & Survivability",
+            "defaultWeight": 1.30,
+            "unit": "Wounds Prevented",
+            "formatBaseline": "1 Wound Prevented",
+            "philosophy": "Characters can take only a limited number of wounds before defeat. Absorbing damage, healing wounds, or redirecting lethal blows extends match longevity and prevents match loss.",
+            "formula": "Points = clamp(WoundsPrevented * 22, 0, 45)",
+            "anchors": {
+                "S_tier": "Abnormal Endurance (Absorbs damage / prevents defeat) -> 44 pts",
+                "A_tier": "Backyard Dummy (Damage redirection/absorption) -> 35 pts",
+                "B_tier": "Minor Wound Heal (Heal 1 wound) -> 22 pts"
+            }
+        },
+        "sideline_reposition": {
+            "name": "Sideline Dodging & Repositioning",
+            "group": "Combat & Survivability",
+            "defaultWeight": 1.15,
+            "unit": "Slot Mobility Factor",
+            "formatBaseline": "Main Step Swap",
+            "philosophy": "Swapping fighters out of the Arena protects damaged characters from lethal strikes and tags in fresh fighters with specialized attack options or defensive barriers.",
+            "formula": "Points = InstantSwap ? 35 : (MainStepSwap ? 22 : 12)",
+            "anchors": {
+                "S_tier": "Instant Attack-Step Escape / Switch -> 35 pts",
+                "A_tier": "End-of-Turn Free Sideline Swap -> 25 pts",
+                "B_tier": "Main Step Action Swap -> 18 pts"
+            }
+        },
+        "net_card_delta": {
+            "name": "Net Hand Advantage",
+            "group": "Resource & Tempo Economy",
+            "defaultWeight": 1.45,
+            "unit": "Net Cards Gained",
+            "formatBaseline": "0 (Cantrip)",
+            "philosophy": "According to Garfield Card Advantage, every card drawn increases tactical options and attack fuel. A card providing net positive cards (+1 or +2) increases card equity directly.",
+            "formula": "Points = NetCardsGained * 20 (Negative if discard cost exceeds draw)",
+            "anchors": {
+                "S_tier": "Draw 2 / Discard 0 (+1 net card) -> 28 pts",
+                "A_tier": "Draw 3 / Discard 1 (+1 net card, high filter) -> 24 pts",
+                "B_tier": "Draw 1 / Discard 0 (Cantrip, 0 net) -> 12 pts",
+                "C_tier": "Pure Burn (-1 net card) -> -8 pts"
+            }
+        },
+        "tutor_equity": {
+            "name": "Targeted Tutor / Search",
+            "group": "Resource & Tempo Economy",
+            "defaultWeight": 1.40,
+            "unit": "Specific Card Retrieval",
+            "formatBaseline": "Search Deck for Item/Technique",
+            "philosophy": "Searching for a specific card eliminates draw variance and accelerates combo assembly. Search directly to hand is significantly better than search to top of deck or into play with restrictions.",
+            "formula": "Points = SearchToHand ? 32 : (SearchToPlay ? 26 : 16)",
+            "anchors": {
+                "S_tier": "Universal Card Search to Hand -> 35 pts",
+                "A_tier": "Item or Technique Search to Hand -> 28 pts",
+                "B_tier": "Search to Top of Deck -> 18 pts"
+            }
+        },
+        "recursion_equity": {
+            "name": "Discard Pile Recursion",
+            "group": "Resource & Tempo Economy",
+            "defaultWeight": 1.10,
+            "unit": "Graveyard Retrieval",
+            "formatBaseline": "Retrieve 1 from Discard",
+            "philosophy": "Recursion grants longevity. Returning cards from discard to hand gives immediate tempo, while returning cards from discard to deck prevents mill-out and recycles key silver bullets.",
+            "formula": "Points = DiscardToHand ? 25 : 15",
+            "anchors": {
+                "S_tier": "Retrieve Any Card from Discard to Hand -> 30 pts",
+                "A_tier": "Retrieve Item/Tech to Hand -> 22 pts",
+                "B_tier": "Shuffle Discard into Deck -> 14 pts"
+            }
+        },
+        "se_delta": {
+            "name": "Spirit Energy Generation",
+            "group": "Resource & Tempo Economy",
+            "defaultWeight": 1.25,
+            "unit": "SE Generated",
+            "formatBaseline": "+1 SE",
+            "philosophy": "SE is the turn-budget currency of the game. Generating SE enables heavy techniques and high-impact events ahead of the natural mana curve.",
+            "formula": "Points = clamp(SEGenerated * 14, 0, 35)",
+            "anchors": {
+                "S_tier": "All For One and One For All (+3 SE) -> 35 pts",
+                "A_tier": "Feast of Souls (+2 SE) -> 26 pts",
+                "B_tier": "+1 SE Passive Generation -> 15 pts"
+            }
+        },
+        "se_cost_friction": {
+            "name": "Spirit Energy Cost Friction",
+            "group": "Resource & Tempo Economy",
+            "defaultWeight": 0.90,
+            "unit": "SE Cost Penalty",
+            "formatBaseline": "1 SE Cost",
+            "philosophy": "Cards costing 0 SE can be played with zero board friction. Cards costing 3+ SE carry severe dead-hand risk on early turns.",
+            "formula": "Points = SECost == 0 ? +12 : -(SECost * 7)",
+            "anchors": {
+                "S_tier": "0 SE Cost (Free tempo) -> +12 pts bonus",
+                "A_tier": "1 SE Cost (Minor friction) -> -7 pts penalty",
+                "B_tier": "2 SE Cost (Moderate friction) -> -14 pts penalty",
+                "C_tier": "3+ SE Cost (Heavy friction) -> -22 pts penalty"
+            }
+        },
+        "permanence_multiplier": {
+            "name": "Permanence & Durability",
+            "group": "Resource & Tempo Economy",
+            "defaultWeight": 1.20,
+            "unit": "Lifespan Multiplier",
+            "formatBaseline": "One-Shot (1.0x)",
+            "philosophy": "Attached items and techniques stay on characters across multiple turns, providing repeated attacks or continuous passive benefits.",
+            "formula": "Multiplier = Attached ? 1.35x : (MatchLong ? 1.50x : 1.00x)",
+            "anchors": {
+                "Continuous": "Attached Items / Techniques -> 1.35x",
+                "Aura": "Match-long persistent effects -> 1.50x",
+                "Burst": "One-and-done events -> 1.00x"
+            }
+        },
+        "opp_hand_discard": {
+            "name": "Opponent Hand Depletion",
+            "group": "Disruption & Control",
+            "defaultWeight": 1.35,
+            "unit": "Opponent Cards Discarded",
+            "formatBaseline": "1 Opponent Card Discarded",
+            "philosophy": "Forcing the opponent to discard robs them of defense cards and attack ammunition. Random discard is significantly stronger than opponent's choice.",
+            "formula": "Points = clamp(RandomDiscard ? Cards * 22 : Cards * 15, 0, 40)",
+            "anchors": {
+                "S_tier": "Force Discard 2+ Cards Randomly -> 38 pts",
+                "A_tier": "Force Discard 1 Card Randomly -> 22 pts",
+                "B_tier": "Opponent Chooses Discard -> 15 pts"
+            }
+        },
+        "opp_deck_mill": {
+            "name": "Opponent Deck Milling",
+            "group": "Disruption & Control",
+            "defaultWeight": 0.85,
+            "unit": "Cards Milled",
+            "formatBaseline": "2 Cards Milled",
+            "philosophy": "Milling opponent cards attacks deck resources and triggers deck-out loss conditions. However, milling without graveyard hate can inadvertently fuel opponent discard engines.",
+            "formula": "Points = clamp(CardsMilled * 6, 0, 30)",
+            "anchors": {
+                "S_tier": "Mill 4+ Cards -> 26 pts",
+                "A_tier": "Mill 2 Cards -> 14 pts",
+                "B_tier": "Mill 1 Card -> 7 pts"
+            }
+        },
+        "opp_resource_denial": {
+            "name": "Opponent Resource Denial",
+            "group": "Disruption & Control",
+            "defaultWeight": 1.20,
+            "unit": "Resource Destroyed",
+            "formatBaseline": "Item Destruction / SE Drain",
+            "philosophy": "Destroying attached items strips permanent benefits; draining opponent SE prevents high-cost retaliation moves.",
+            "formula": "Points = ItemDestroy ? 26 : (SEDrain ? 22 : 12)",
+            "anchors": {
+                "S_tier": "Item Removal + Effect Nullification -> 28 pts",
+                "A_tier": "SE Drain / Steal -> 22 pts"
+            }
+        },
+        "item_affinity": {
+            "name": "Item Engine Affinity",
+            "group": "Contextual & Engine Compatibility",
+            "defaultWeight": 1.30,
+            "unit": "Synergy Scaling Tier",
+            "formatBaseline": "Scales with Items in Play",
+            "philosophy": "Cards like Shadow Sword and Yusuke the Student scale exponentially when surrounded by item attachments, unlocking bonus damage or search triggers.",
+            "formula": "SynergyBonus = clamp(ItemRatio * 35, 0, 40)",
+            "anchors": {
+                "S_tier": "Shadow Sword (+2000 per attached item) -> 40 pts",
+                "A_tier": "Item Attachment Triggers -> 25 pts"
+            }
+        },
+        "event_discard_affinity": {
+            "name": "Event / Discard Loop Affinity",
+            "group": "Contextual & Engine Compatibility",
+            "defaultWeight": 1.25,
+            "unit": "Synergy Scaling Tier",
+            "formatBaseline": "Scales with Events Discarded",
+            "philosophy": "Cards like Dragon Pen and Koenma Disguised thrive in high-event decks that benefit from rapid graveyard loading.",
+            "formula": "SynergyBonus = clamp(EventRatio * 32, 0, 38)",
+            "anchors": {
+                "S_tier": "Koenma Disguised (Scales with events in discard) -> 38 pts",
+                "A_tier": "Event Mill Acceleration -> 24 pts"
+            }
+        },
+        "team_alignment_lock": {
+            "name": "Team & Alignment Synergy Lock",
+            "group": "Contextual & Engine Compatibility",
+            "defaultWeight": 1.35,
+            "unit": "Roster Synergy Factor",
+            "formatBaseline": "Active Team Bonus Required",
+            "philosophy": "Cards with Team Bonus clauses are balanced with higher power ceilings, but become completely inactive if the 4 starting fighters do not match.",
+            "formula": "ActiveBonus = 30 pts (Active) vs -15 pts (Mismatched)",
+            "anchors": {
+                "S_tier": "Full Team Bonus Synergy -> +30 pts bonus",
+                "Detriment": "Mismatched Team Requirement -> -15 pts penalty"
+            }
+        }
+    }
+}
+
+os.makedirs('tools/balance-studio/data', exist_ok=True)
+with open('tools/balance-studio/data/methodology_dossier.json', 'w', encoding='utf-8') as f:
+    json.dump(DOSSIER, f, indent=2)
+
+print("Created tools/balance-studio/data/methodology_dossier.json successfully!")

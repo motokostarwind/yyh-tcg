@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YYH TCG - Card Balancing Studio & Algorithmic Valuation System</title>
+  <link rel="stylesheet" href="studio.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Top App Navigation Bar -->
+  <header class="studio-header">
+    <div class="header-left">
+      <div class="logo-group">
+        <span class="spirit-orb"></span>
+        <div>
+          <h1 class="studio-title">YYH TCG BALANCE STUDIO</h1>
+          <p class="studio-subtitle">Algorithmic Valuation &amp; Active-Learning Calibration System</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Statistics Ticker -->
+    <div class="header-ticker">
+      <div class="ticker-item">
+        <span class="ticker-label">Pool</span>
+        <span class="ticker-val" id="tickerTotalCards">533</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">Primitives</span>
+        <span class="ticker-val">18</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">Approved</span>
+        <span class="ticker-val text-success" id="tickerApproved">0</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">Disputed</span>
+        <span class="ticker-val text-warning" id="tickerDisputed">0</span>
+      </div>
+      <div class="ticker-item">
+        <span class="ticker-label">Profile</span>
+        <span class="ticker-val text-accent" id="tickerPresetName">Default</span>
+      </div>
+    </div>
+
+    <!-- Header Actions -->
+    <div class="header-actions">
+      <button class="btn btn-outline" id="btnOpenDossier" title="View System Philosophy & Formulas">
+        📖 Methodology Dossier
+      </button>
+      <button class="btn btn-outline" id="btnToggleSliders" title="Adjust Algorithm Category Weights">
+        ⚙️ Weight Sliders
+      </button>
+      <button class="btn btn-outline" id="btnExportReviews" title="Download Feedback JSON">
+        💾 Export Reviews
+      </button>
+      <button class="btn btn-accent" id="btnPublishLive" title="Publish Matrix to src/data/card_balance_matrix.json">
+        🚀 Publish to Live Site
+      </button>
+    </div>
+  </header>
+
+  <!-- Filter & Navigation Bar -->
+  <nav class="filter-bar">
+    <div class="filter-controls">
+      <!-- Search Input -->
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search card name, text, ID, team..." autocomplete="off">
+        <button id="btnClearSearch" class="btn-clear" style="display:none;">&times;</button>
+      </div>
+
+      <!-- Filters -->
+      <select id="filterType" class="select-filter">
+        <option value="ALL">All Types</option>
+        <option value="Character">Characters</option>
+        <option value="Item">Items</option>
+        <option value="Technique">Techniques</option>
+        <option value="Special Moves">Special Moves</option>
+        <option value="Event">Events</option>
+      </select>
+
+      <select id="filterSet" class="select-filter">
+        <option value="ALL">All Sets</option>
+        <option value="Ghost Files">Ghost Files</option>
+        <option value="Dark Tournament">Dark Tournament</option>
+        <option value="Gateway">Gateway</option>
+      </select>
+
+      <select id="filterTier" class="select-filter">
+        <option value="ALL">All Tiers</option>
+        <option value="S-Tier">S-Tier (90-100)</option>
+        <option value="A-Tier">A-Tier (78-89)</option>
+        <option value="B-Tier">B-Tier (60-77)</option>
+        <option value="C-Tier">C-Tier (42-59)</option>
+        <option value="D-Tier">D-Tier (0-41)</option>
+      </select>
+
+      <select id="filterStatus" class="select-filter">
+        <option value="ALL">All Reviews</option>
+        <option value="UNREVIEWED">Unreviewed</option>
+        <option value="APPROVED">Approved 👍</option>
+        <option value="DISPUTED">Disputed 👎</option>
+      </select>
+
+      <select id="sortOrder" class="select-filter">
+        <option value="SCORE_DESC">Score: High → Low</option>
+        <option value="SCORE_ASC">Score: Low → High</option>
+        <option value="SYNERGY_DESC">Synergy: High → Low</option>
+        <option value="ID_ASC">Card ID / Number</option>
+        <option value="NAME_ASC">Card Name (A-Z)</option>
+      </select>
+    </div>
+
+    <!-- Quick Pagination / Jump -->
+    <div class="nav-jump">
+      <button class="btn btn-sm btn-nav" id="btnPrevCard" title="Previous Card (Left Arrow)">◀ Prev</button>
+      <select id="cardJumpSelect" class="select-jump"></select>
+      <button class="btn btn-sm btn-nav" id="btnNextCard" title="Next Card (Right Arrow)">Next ▶</button>
+      <span class="jump-counter" id="jumpCounter">1 / 533</span>
+    </div>
+  </nav>
+
+  <!-- Main 3-Column Studio Workbench -->
+  <main class="workbench">
+
+    <!-- COLUMN 1: Physical Card Inspector -->
+    <section class="column-card-inspector">
+      <div class="panel-header">
+        <h2>Card Inspector</h2>
+        <span class="inspector-badge" id="cardSourceSet">Ghost Files</span>
+      </div>
+
+      <div class="card-scan-wrapper">
+        <img id="cardScanImg" src="" alt="Card Scan" class="card-scan" loading="lazy">
+        <div class="scan-overlay-hint">Click image to inspect full size</div>
+      </div>
+
+      <!-- Metadata Attributes -->
+      <div class="meta-pills" id="metaPillsContainer">
+        <!-- Injected via studio.js -->
+      </div>
+
+      <!-- Official Card Verbatim Text -->
+      <div class="card-text-panel">
+        <div class="panel-subhead">Official Card Text</div>
+        <div class="card-verbatim-text" id="cardVerbatimText">Loading text...</div>
+      </div>
+
+      <!-- Official Errata Banner (Hidden if none) -->
+      <div class="errata-panel" id="errataPanel" style="display:none;">
+        <div class="errata-title">⚠️ Official Score Errata Alert</div>
+        <div class="errata-text" id="errataText"></div>
+      </div>
+    </section>
+
+
+    <!-- COLUMN 2: Algorithmic Deliberation & Calculation Trace -->
+    <section class="column-deliberation">
+      <!-- Score & Tier Header -->
+      <div class="score-banner" id="scoreBanner">
+        <div class="score-ring-wrapper">
+          <div class="score-number" id="cardOverallScore">--</div>
+          <div class="score-max">/ 100</div>
+        </div>
+        <div class="score-details">
+          <div class="tier-badge-large" id="cardTierBadge">S-TIER</div>
+          <div class="score-caption" id="cardTierCaption">Tournament Staple</div>
+          <div class="synergy-meter-wrapper">
+            <span class="synergy-label">Peak Synergy Index:</span>
+            <div class="synergy-bar-bg">
+              <div class="synergy-bar-fill" id="synergyBarFill" style="width: 50%;"></div>
+            </div>
+            <span class="synergy-val" id="cardSynergyVal">50</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Human Verification Status Banner (If reviewed) -->
+      <div class="review-status-banner" id="reviewStatusBanner" style="display:none;">
+        <!-- Injected via studio.js -->
+      </div>
+
+      <!-- Multi-Agent Deliberation Panels -->
+      <div class="deliberation-box">
+        <div class="deliberation-tabs">
+          <button class="tab-btn active" data-tab="tab-theorist">📐 TCG Theorist</button>
+          <button class="tab-btn" data-tab="tab-auditor">⚖️ Rules Auditor</button>
+          <button class="tab-btn" data-tab="tab-synergy">🔄 Synergy Specialist</button>
+          <button class="tab-btn" data-tab="tab-consensus">🤝 Consensus Synthesis</button>
+        </div>
+
+        <div class="tab-content" id="tab-theorist">
+          <div class="agent-tag">TCG Game Theorist • Mathematical Resource Budget</div>
+          <p id="agentTheoristText" class="agent-p"></p>
+        </div>
+
+        <div class="tab-content" id="tab-auditor" style="display:none;">
+          <div class="agent-tag">Rules &amp; Errata Auditor • Strict Text &amp; Phase Verification</div>
+          <p id="agentAuditorText" class="agent-p"></p>
+        </div>
+
+        <div class="tab-content" id="tab-synergy" style="display:none;">
+          <div class="agent-tag">Synergy Specialist • Engine Chains &amp; Archetype Payoffs</div>
+          <p id="agentSynergyText" class="agent-p"></p>
+        </div>
+
+        <div class="tab-content" id="tab-consensus" style="display:none;">
+          <div class="agent-tag">Synthesis &amp; Human Liaison • Final Deliberation</div>
+          <p id="agentConsensusText" class="agent-p"></p>
+        </div>
+      </div>
+
+      <!-- Calculation Trace Table (The Mathematical Receipt) -->
+      <div class="trace-section">
+        <div class="trace-header">
+          <h3>Algorithmic Calculation Trace (Receipt)</h3>
+          <span class="trace-formula-hint">Points = Metric × Category Weight × Multipliers</span>
+        </div>
+        <div class="table-container">
+          <table class="trace-table" id="traceTable">
+            <thead>
+              <tr>
+                <th>Evaluated Category</th>
+                <th>Raw Metric</th>
+                <th>Points</th>
+                <th>Game Theory Rationale</th>
+              </tr>
+            </thead>
+            <tbody id="traceTableBody">
+              <!-- Injected via studio.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 18 Micro-Categories Profile Meters -->
+      <div class="micro-categories-section">
+        <div class="micro-header">
+          <h3>18 Micro-Category Primitives Profile</h3>
+          <span class="micro-hint">Click any category to inspect methodology</span>
+        </div>
+        <div class="micro-grid" id="microCategoriesGrid">
+          <!-- Injected via studio.js -->
+        </div>
+      </div>
+    </section>
+
+
+    <!-- COLUMN 3: Active-Learning Feedback & Real-Time Controls -->
+    <section class="column-feedback">
+      <!-- Human-In-The-Loop Review Console -->
+      <div class="panel feedback-panel">
+        <div class="panel-header">
+          <h2>Arbiter Calibration Console</h2>
+          <span class="panel-tag">Human Feedback Loop</span>
+        </div>
+
+        <p class="feedback-intro">
+          Review the algorithmic valuation. If the agent made an accurate assessment, click <strong>Approve</strong>. If it overlooked interactions, timing, or format context, click <strong>Dispute</strong> to submit a ruling.
+        </p>
+
+        <!-- Quick Decision Buttons -->
+        <div class="decision-buttons">
+          <button class="btn btn-decision btn-approve" id="btnApproveCard">
+            👍 Approve Rating
+          </button>
+          <button class="btn btn-decision btn-dispute" id="btnDisputeCard">
+            👎 Dispute / Recalibrate
+          </button>
+        </div>
+
+        <!-- Dispute Form Drawer -->
+        <div class="dispute-form" id="disputeForm" style="display:none;">
+          <div class="form-group">
+            <label for="disputeCategory">Disputed Micro-Category:</label>
+            <select id="disputeCategory" class="form-control">
+              <option value="Overall Score">Overall Score (Holistic Rating)</option>
+              <!-- Populated dynamically with 18 categories -->
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="disputeScoreInput">Suggested Balanced Score (0 – 100):</label>
+            <div class="slider-with-number">
+              <input type="range" id="disputeScoreSlider" min="1" max="100" value="75" class="range-slider">
+              <input type="number" id="disputeScoreInput" min="1" max="100" value="75" class="number-input">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="disputeNotes">Arbitration Critique &amp; Mechanical Rationale:</label>
+            <textarea id="disputeNotes" class="form-control" rows="4" placeholder="Explain why the card is overvalued or undervalued (e.g., 'Requires an uninjured Grappled target, which is rare against Team Urameshi; defense boost is conditional')."></textarea>
+          </div>
+
+          <button class="btn btn-accent btn-full" id="btnSubmitDispute">
+            💾 Record Ruling &amp; Recalibrate Card
+          </button>
+        </div>
+      </div>
+
+      <!-- Recent Arbitrator Rulings -->
+      <div class="panel history-panel">
+        <div class="panel-header">
+          <h3>Recent Arbitrator Rulings</h3>
+          <span class="badge badge-subtle" id="historyCountBadge">0 Reviews</span>
+        </div>
+        <div class="review-history-list" id="reviewHistoryList">
+          <div class="empty-history">No card reviews recorded yet.</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+
+  <!-- Collapsible / Sliding Weight Adjustment Console -->
+  <aside class="weights-drawer" id="weightsDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title-group">
+        <h2>Algorithmic Category Weight Sliders</h2>
+        <p>Adjust category multipliers to calibrate global scoring in real time.</p>
+      </div>
+      <button class="btn-close-drawer" id="btnCloseSliders">&times;</button>
+    </div>
+
+    <!-- Weight Presets -->
+    <div class="preset-buttons">
+      <button class="btn btn-sm btn-preset active" data-preset="default">Default 2003 Score</button>
+      <button class="btn btn-sm btn-preset" data-preset="aggro">High Combat / Aggro</button>
+      <button class="btn btn-sm btn-preset" data-preset="stall">Defensive Stall Meta</button>
+      <button class="btn btn-sm btn-preset" data-preset="garfield">Garfield Pure Advantage</button>
+      <button class="btn btn-sm btn-preset" data-preset="mill">Control &amp; Mill</button>
+      <button class="btn btn-sm btn-reset" id="btnResetWeights">↺ Reset</button>
+    </div>
+
+    <!-- 18 Sliders List -->
+    <div class="sliders-scroll-area" id="slidersContainer">
+      <!-- Injected via studio.js -->
+    </div>
+  </aside>
+
+
+  <!-- Global Methodology Dossier Modal -->
+  <div class="modal-backdrop" id="dossierModal" style="display:none;">
+    <div class="modal-dialog modal-dossier">
+      <div class="modal-header">
+        <div>
+          <h2 class="modal-title">System Methodology Dossier</h2>
+          <p class="modal-subtitle">Official Game Theory Architecture, Mathematical Formulas &amp; Anchor Cards</p>
+        </div>
+        <button class="modal-close" id="btnCloseDossier">&times;</button>
+      </div>
+
+      <div class="modal-body dossier-body">
+        <div class="dossier-search-bar">
+          <input type="text" id="dossierFilter" placeholder="Filter primitives by name or keyword..." class="form-control">
+        </div>
+        <div class="dossier-categories-list" id="dossierCategoriesList">
+          <!-- Injected via studio.js from methodology_dossier.json -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Image Lightbox Modal -->
+  <div class="modal-backdrop" id="imageLightbox" style="display:none;">
+    <div class="modal-dialog modal-image">
+      <button class="modal-close lightbox-close" id="btnCloseLightbox">&times;</button>
+      <img id="lightboxImg" src="" alt="Full Card Scan" class="lightbox-img">
+      <div class="lightbox-caption" id="lightboxCaption"></div>
+    </div>
+  </div>
+
+  <!-- Notification Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Script -->
+  <script src="studio.js"></script>
+</body>
+</html>
