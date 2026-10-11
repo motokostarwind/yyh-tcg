@@ -3,6 +3,9 @@
  * Supports 2003 Score YYH TCG rules, card search, deck construction, and analytics.
  */
 
+// Flag to temporarily hide combos & card rankings from main site while calibration is underway in studio
+const HIDE_COMBOS_AND_RANKINGS = true;
+
 // Global State
 const state = {
   cards: [],
@@ -419,7 +422,7 @@ function renderCardGrid() {
     if (c.defense) badgesHtml += `<span class="badge badge-def">DEF ${c.defense}</span>`;
     if (c.seCost !== null) badgesHtml += `<span class="badge badge-se">SE ${c.seCost}</span>`;
     if (c.hasErrata) badgesHtml += `<span class="badge badge-errata" title="Official Tournament Ruling / Errata">⚖️ Errata</span>`;
-    if (c.comboLines && c.comboLines.length > 0) {
+    if (!HIDE_COMBOS_AND_RANKINGS && c.comboLines && c.comboLines.length > 0) {
       badgesHtml += `<span class="badge badge-combo" data-id="${c.id}" title="${c.comboLines.length} Combo Recipe(s) Available">💥 ${c.comboLines.length} Combo${c.comboLines.length > 1 ? 's' : ''}</span>`;
     }
 
@@ -438,10 +441,12 @@ function renderCardGrid() {
       </div>
     ` : '';
 
-    const hasCombos = c.comboLines && c.comboLines.length > 0;
+    const hasCombos = !HIDE_COMBOS_AND_RANKINGS && c.comboLines && c.comboLines.length > 0;
     const comboBadgeHtml = hasCombos ? `<div class="card-combo-floating-badge" data-id="${c.id}" title="View ${c.comboLines.length} Combo Recipe(s)">💥 ${c.comboLines.length} Combo${c.comboLines.length > 1 ? 's' : ''}</div>` : '';
-    const comboBtnText = hasCombos ? `💥 ${c.comboLines.length} Combo${c.comboLines.length > 1 ? 's' : ''}` : '⚡ Combos';
-    const comboBtnClass = hasCombos ? 'btn btn-combo-inspect has-combos' : 'btn btn-combo-inspect no-combos';
+    const comboBtnHtml = !HIDE_COMBOS_AND_RANKINGS ? `
+      <button class="${hasCombos ? 'btn btn-combo-inspect has-combos' : 'btn btn-combo-inspect no-combos'}" data-id="${c.id}" title="Inspect Combos & Synergies">
+        ${hasCombos ? `💥 ${c.comboLines.length} Combo${c.comboLines.length > 1 ? 's' : ''}` : '⚡ Combos'}
+      </button>` : '';
 
     cardEl.innerHTML = `
       <div class="card-img-container" data-id="${c.id}">
@@ -465,7 +470,7 @@ function renderCardGrid() {
             <button class="btn btn-add-main" data-id="${c.id}">
               + Main (${currentDeckCount}/${c.limitPerDeck})
             </button>
-            <button class="${comboBtnClass}" data-id="${c.id}" title="Inspect Combos & Synergies">${comboBtnText}</button>
+            ${comboBtnHtml}
           </div>
           ${slotButtons}
         </div>
@@ -528,7 +533,7 @@ function renderCardTable() {
     if (c.hasErrata) tr.className = 'table-row-errata';
     const errataTag = c.hasErrata ? ` <span class="badge badge-errata" title="Official Tournament Errata">⚖️ Ruling</span>` : '';
     const limitTag = c.limitPerDeck < 3 ? ` <span class="badge" style="background:${c.limitPerDeck === 1 ? '#dc2626' : '#ea580c'};color:#fff">Limit ${c.limitPerDeck}</span>` : '';
-    const comboTag = (c.comboLines && c.comboLines.length > 0) ? ` <span class="badge badge-combo btn-combo-table" data-id="${c.id}" style="cursor:pointer;" title="View Combos">💥 Combos</span>` : '';
+    const comboTag = (!HIDE_COMBOS_AND_RANKINGS && c.comboLines && c.comboLines.length > 0) ? ` <span class="badge badge-combo btn-combo-table" data-id="${c.id}" style="cursor:pointer;" title="View Combos">💥 Combos</span>` : '';
 
     tr.innerHTML = `
       <td>
@@ -815,7 +820,7 @@ function openCardModal(card) {
   const deckSynergies = computeActiveDeckSynergies(card);
   const hasCombos = card.comboLines && card.comboLines.length > 0;
 
-  if (hasCombos || deckSynergies.length > 0) {
+  if (!HIDE_COMBOS_AND_RANKINGS && (hasCombos || deckSynergies.length > 0)) {
     combosSection.style.display = 'flex';
     combosList.innerHTML = '';
 
@@ -938,6 +943,7 @@ function closeCardModal() {
 
 // 5b. Card Combo & Synergy Inspector
 function inspectCardCombos(card) {
+  if (HIDE_COMBOS_AND_RANKINGS) return;
   const inspector = document.getElementById('cardComboInspector');
   if (!inspector) return;
 
@@ -2335,17 +2341,28 @@ function renderMatchupSimulation(sim) {
     else winRateEl.classList.add('val-balanced');
   }
 
-  if (synergyScoreEl) {
-    synergyScoreEl.textContent = `${sim.synergyScore ?? 50} / 100`;
-    synergyScoreEl.className = 'sim-pill-val';
-    if (sim.synergyScore >= 80) synergyScoreEl.classList.add('val-favorable');
-    else if (sim.synergyScore < 50) synergyScoreEl.classList.add('val-unfavorable');
-    else synergyScoreEl.classList.add('val-balanced');
-  }
+  if (HIDE_COMBOS_AND_RANKINGS) {
+    const pairingsBlock = document.getElementById('simPairingsBlock');
+    if (pairingsBlock) pairingsBlock.style.display = 'none';
+    const combosBlock = document.getElementById('simCombosBlock');
+    if (combosBlock) combosBlock.style.display = 'none';
+    const synPill = document.getElementById('simDeckSynergyPill');
+    if (synPill) synPill.style.display = 'none';
+    const activePill = document.getElementById('simActiveCombosPill');
+    if (activePill) activePill.style.display = 'none';
+  } else {
+    if (synergyScoreEl) {
+      synergyScoreEl.textContent = `${sim.synergyScore ?? 50} / 100`;
+      synergyScoreEl.className = 'sim-pill-val';
+      if (sim.synergyScore >= 80) synergyScoreEl.classList.add('val-favorable');
+      else if (sim.synergyScore < 50) synergyScoreEl.classList.add('val-unfavorable');
+      else synergyScoreEl.classList.add('val-balanced');
+    }
 
-  if (activeCountEl) {
-    const count = (sim.rankedCombos || []).length;
-    activeCountEl.textContent = `${count} Active`;
+    if (activeCountEl) {
+      const count = (sim.rankedCombos || []).length;
+      activeCountEl.textContent = `${count} Active`;
+    }
   }
 
   // Render 4 Gauntlet Decks
@@ -2377,7 +2394,7 @@ function renderMatchupSimulation(sim) {
   }
 
   // Render Top Pairings (Strongest Together)
-  if (pairingsEl) {
+  if (!HIDE_COMBOS_AND_RANKINGS && pairingsEl) {
     pairingsEl.innerHTML = '';
     if (!sim.rankedPairings || sim.rankedPairings.length === 0) {
       pairingsEl.innerHTML = '<div class="sim-empty-msg">Add more cards to your deck to discover synergistic pairings!</div>';
@@ -2417,7 +2434,7 @@ function renderMatchupSimulation(sim) {
   }
 
   // Render Key Combos Executed
-  if (combosEl) {
+  if (!HIDE_COMBOS_AND_RANKINGS && combosEl) {
     combosEl.innerHTML = '';
     if (!sim.rankedCombos || sim.rankedCombos.length === 0) {
       combosEl.innerHTML = '<div class="sim-empty-msg">No active combo lines assembled yet. Check recommendations to add combo partners!</div>';

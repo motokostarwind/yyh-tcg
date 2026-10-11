@@ -54,7 +54,7 @@
           <div class="search-row">
             <div class="search-input-wrapper">
               <span class="search-icon">🔍</span>
-              <input type="text" id="searchInput" placeholder="Search cards by name, text, combo (Press Enter to fast-add top result)..." autocomplete="off">
+              <input type="text" id="searchInput" placeholder="Search cards by name, text, card number (Press Enter to fast-add top result)..." autocomplete="off">
               <button id="clearSearchBtn" class="clear-btn" title="Clear search">✕</button>
               <span class="search-fast-add-hint" title="Press Enter to immediately add the first search result to your active deck">↵ Enter to Add</span>
             </div>
@@ -171,8 +171,8 @@
           </div>
         </div>
 
-        <!-- Dedicated Card Combo & Synergy Inspector Panel -->
-        <div id="cardComboInspector" class="combo-inspector-panel" style="display: none;">
+        <!-- Dedicated Card Combo & Synergy Inspector Panel (Hidden for now) -->
+        <div id="cardComboInspector" class="combo-inspector-panel" style="display: none !important;">
           <div class="inspector-header">
             <div class="inspector-card-preview">
               <img id="inspectorThumb" class="inspector-thumb" src="" alt="Selected Card">
@@ -519,8 +519,8 @@
               <div class="analytics-card simulator-card" id="deckSimulatorCard">
                 <div class="card-header-flex">
                   <div>
-                    <h4>⚔️ Matchup Simulation & Combo Synergy Discovery</h4>
-                    <span class="header-sub">Simulates matches against Meta Gauntlet to identify top combos & pairings</span>
+                    <h4>⚔️ Matchup Simulation & Gauntlet Testing</h4>
+                    <span class="header-sub">Simulates matches against Meta Gauntlet to test win rate</span>
                   </div>
                   <div class="sim-header-actions">
                     <button class="btn btn-secondary btn-sm" id="btnManageGauntlet" title="Choose and customize opponent decks in the Meta Gauntlet">⚙️ Edit Gauntlet</button>
@@ -541,11 +541,11 @@
                     <span class="sim-pill-label">Gauntlet Win Rate</span>
                     <span class="sim-pill-val" id="simGauntletWinRate">--%</span>
                   </div>
-                  <div class="sim-metric-pill">
+                  <div class="sim-metric-pill" id="simDeckSynergyPill" style="display: none !important;">
                     <span class="sim-pill-label">Deck Synergy Rating</span>
                     <span class="sim-pill-val" id="simDeckSynergyScore">-- / 100</span>
                   </div>
-                  <div class="sim-metric-pill">
+                  <div class="sim-metric-pill" id="simActiveCombosPill" style="display: none !important;">
                     <span class="sim-pill-label">Active Combos</span>
                     <span class="sim-pill-val" id="simActiveCombosCount">0</span>
                   </div>
@@ -556,8 +556,8 @@
                   <!-- 4 Gauntlet Decks with Win Rates and Avg Turns -->
                 </div>
 
-                <!-- Top Card Pairings (Strongest Together) -->
-                <div class="sim-section-block">
+                <!-- Top Card Pairings (Hidden for now) -->
+                <div class="sim-section-block" id="simPairingsBlock" style="display: none !important;">
                   <div class="sim-section-header">
                     <span class="sim-section-title">🤝 Top Card Pairings (Strongest Together)</span>
                     <span class="sim-section-hint">Identified by win rate correlation & synergy lift (+Δ%) when drawn together</span>
@@ -567,8 +567,8 @@
                   </div>
                 </div>
 
-                <!-- Key Combo Execution & Lethality -->
-                <div class="sim-section-block">
+                <!-- Key Combo Execution & Lethality (Hidden for now) -->
+                <div class="sim-section-block" id="simCombosBlock" style="display: none !important;">
                   <div class="sim-section-header">
                     <span class="sim-section-title">💥 Key Combo Execution & Win Rate</span>
                     <span class="sim-section-hint">How often combos trigger and their win rate when executed</span>
@@ -840,8 +840,8 @@
               </div>
             </div>
 
-            <!-- Universal Combo Recipes Section -->
-            <div class="card-modal-combos" id="modalCombosSection" style="display: none;">
+            <!-- Universal Combo Recipes Section (Hidden for now) -->
+            <div class="card-modal-combos" id="modalCombosSection" style="display: none !important;">
               <div class="combo-head">
                 <span class="combo-icon">💥</span>
                 <div class="combo-title-group">

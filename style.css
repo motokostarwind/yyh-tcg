@@ -4941,3 +4941,21 @@ body {
   border-top: 1px solid var(--border-color);
 }
 
+/* ============================================================
+   TEMPORARILY HIDE COMBOS & CARD RANKINGS FROM MAIN SITE
+   ============================================================ */
+.card-combo-floating-badge,
+.btn-combo-inspect,
+.badge-combo,
+.btn-combo-table,
+.combo-inspector-panel,
+#cardComboInspector,
+#modalCombosSection,
+#simPairingsBlock,
+#simCombosBlock,
+#simDeckSynergyPill,
+#simActiveCombosPill {
+  display: none !important;
+}
+
+
